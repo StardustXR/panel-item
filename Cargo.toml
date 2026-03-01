@@ -4,31 +4,31 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["acceptor", "asteroids_acceptor"]
-acceptor = []
-provider = []
-asteroids_acceptor = ["dep:stardust-xr-asteroids", "acceptor"]
+default = ["asteroids"]
+asteroids = ["dep:stardust-xr-asteroids"]
 
 [dependencies]
-serde = { version = "1.0.228", features = ["derive"] }
-stardust-xr-wire.git = "https://github.com/StardustXR/core"
-stardust-xr-gluon.git = "https://github.com/StardustXR/core"
 stardust-xr-fusion.git = "https://github.com/StardustXR/core"
 stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids", optional = true }
 tokio = { version = "1.49.0", features = ["sync"] }
-parking_lot = "0.12.5"
 rustc-hash = "2.1.1"
 tracing = "0.1.44"
-zbus = "5.13.2"
-thiserror = "2.0.18"
 derive-where = "1.6.0"
 derive_setters = "0.1.9"
+# gluon-wire.git = "https://github.com/Schmarni-Dev/gluon"
+gluon-wire.path = "../gluon/gluon-wire"
+# binderbinder.git = "https://github.com/Technobaboo/binderbinder"
+binderbinder.path = "../binderbinder"
+pion-binder.path = "../pion"
+mint = "0.5.9"
+rand = "0.10.0"
+directories = "6.0.0"
 
 [build-dependencies]
-color-eyre = "0.6"
-quote = "1"
-proc-macro2 = "1"
 syn = "2"
 prettyplease = "0.2"
-convert_case = "0.10"
-stardust-xr-protocol.git = "https://github.com/StardustXR/core"
+# gluon-binder.git = "https://github.com/Schmarni-Dev/gluon"
+# gluon-codegen-rust.git = "https://github.com/Schmarni-Dev/gluon"
+gluon-binder.path = "../gluon"
+gluon-codegen-rust.path = "../gluon/gluon-codegen-rust"
+# gluon-codegen-rust.git = "https://github.com/Schmarni-Dev/gluon"

@@ -1,0 +1,131 @@
+/// PanelItem
+interface PanelItem {
+	register_xkb_keymap(xkb_keymap: String) -> (id: KeymapId)
+
+	absolute_pointer_motion(surface: SurfaceId, position: UVec2)
+	relative_pointer_motion(surface: SurfaceId, delta: UVec2)
+	// uses event ids from `input_event_codes.h`
+	pointer_button(surface: SurfaceId, button: u32, pressed: bool)
+	pointer_scroll(surface: SurfaceId, delta: Vec2, source: ScrollSource)
+	// TODO: expose stop timestamp?
+	pointer_scroll_stop(surface: SurfaceId)
+	key(surface: SurfaceId, keymap: KeymapId, key: u32, pressed: bool)
+	touch_down(surface: SurfaceId, touch_id: u32, position: Vec2)
+	touch_move(surface: SurfaceId, touch_id: u32, position: Vec2)
+	touch_up(surface: SurfaceId, touch_id: u32, position: Vec2)
+
+	close_toplevel()
+
+	resize_toplevel_to_app_request()
+	request_toplevel_resize(new_size: UVec2)
+	// if the toplevel should be treated as "focused", this defaults to true on panelItem connect
+	toplevel_focused(focused: bool)
+	
+}
+/// PanelShell
+interface PanelShell {
+	update_cursor_dmatex(dmatex_uid: u64, acquire_point: u64, release_point: u64)
+	update_surface_dmatex(surface: SurfaceId, dmatex_uid: u64, acquire_point: u64, release_point: u64)
+
+	toplevel_fullscreen(fullscreen_active: bool)
+	toplevel_title(title: String)
+	toplevel_app_id(app_id: String)
+
+	set_cursor_visuals(geometry: Option<Geometry>)
+	create_child(child: ChildState)
+	move_child(child_id: u64, geometry: Geometry)
+	destroy_child(child_id: u64)
+}
+/// PanelItemAcceptor
+interface PanelItemAcceptor {
+	accept(item: Ref<PanelItem>) -> (shell: Ref<PanelShell>, output_spatial: SpatialRefId)
+	// TODO: maybe remove with the SpatialQueryService?
+	get_field() -> (field: FieldRefId)
+}
+/// Temporary until the SpatialQueryService is implemented
+interface PanelItemProvider {
+	register_acceptor(acceptor: Ref<PanelItemAcceptor>)
+	drop_acceptor(acceptor: Ref<PanelItemAcceptor>)
+}
+
+/// KeymapId
+struct KeymapIdCloneHash {
+	id: u64,
+}
+
+/// ScrollSource
+enum ScrollSourceCloneHash {
+	Wheel,
+	Touch,
+	Continuous,
+	WheelTilt,
+}
+
+/// SpatialRef
+struct SpatialRefIdClone {
+	id: u64,
+}
+
+/// FieldRef
+struct FieldRefIdClone {
+	id: u64,
+}
+
+/// SurfaceId
+enum SurfaceIdCloneHash {
+	TopLevel,
+	Child { id: u64 },
+}
+
+/// ToplevelState
+struct ToplevelState {
+	parent: Option<u64>,
+	title: Option<String>,
+	app_id: Option<String>,
+	size: UVec2,
+	min_size: Option<UVec2>,
+	max_size: Option<UVec2>,
+}
+
+/// ChildState
+struct ChildState {
+	id: u64,
+	parent: SurfaceId,
+	geometry: Geometry,
+	z_order: i32,
+	input_regions: Vec<Rect>,
+}
+
+/// PanelItemInitData
+struct PanelItemInitData {
+	cursor: Option<Geometry>,
+	toplevel: ToplevelState,
+	children: Vec<ChildState>,
+}
+
+/// Rect
+struct RectClone {
+	origin: Vec2,
+	size: Vec2,
+}
+
+/// Geometry
+struct GeometryCloneHash {
+	origin: IVec2,
+	size: UVec2,
+}
+/// Vec2
+struct Vec2Clone {
+	x: f32,
+	y: f32,
+}
+/// UVec2
+struct UVec2CloneHash {
+	x: u32,
+	y: u32,
+}
+/// iVec2
+struct iVec2CloneHash {
+	x: i32,
+	y: i32,
+}
