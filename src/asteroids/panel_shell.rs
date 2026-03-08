@@ -25,7 +25,7 @@ pub struct PanelShell<State: ValidState> {
     update_cursor_dmatex: FnWrapper<dyn Fn(&mut State, &PanelItem, DmatexSubmitInfo) + Send + Sync>,
     #[setters(skip)]
     update_surface_dmatex:
-        FnWrapper<dyn Fn(&mut State, &PanelItem, SurfaceId, DmatexSubmitInfo) + Send + Sync>,
+        FnWrapper<dyn Fn(&mut State, &PanelItem, SurfaceId, DmatexSubmitInfo, bool) + Send + Sync>,
     on_toplevel_fullscreen_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, bool) + Send + Sync>,
     on_toplevel_title_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, String) + Send + Sync>,
     on_toplevel_app_id_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, String) + Send + Sync>,
@@ -98,6 +98,7 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
                     dmatex_uid,
                     acquire_point,
                     release_point,
+                    opaque,
                 } => {
                     let dmatex_id: u64 = random();
                     stardust_xr_fusion::drawable::import_dmatex_uid(
@@ -115,6 +116,7 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
                             acquire_point,
                             release_point,
                         },
+                        opaque,
                     )
                 }
                 PanelShellEvent::ToplevelFullscreen { fullscreen_active } => {
@@ -193,6 +195,7 @@ enum PanelShellEvent {
         dmatex_uid: u64,
         acquire_point: u64,
         release_point: u64,
+        opaque: bool,
     },
     ToplevelFullscreen {
         fullscreen_active: bool,
@@ -235,6 +238,7 @@ impl crate::protocol::PanelShellHandler for PanelShellHandler {
         dmatex_uid: u64,
         acquire_point: u64,
         release_point: u64,
+        opaque: bool,
     ) {
         self.tx
             .send(PanelShellEvent::UpdateSurfaceDmatex {
@@ -242,6 +246,7 @@ impl crate::protocol::PanelShellHandler for PanelShellHandler {
                 dmatex_uid,
                 acquire_point,
                 release_point,
+                opaque,
             })
             .unwrap();
     }

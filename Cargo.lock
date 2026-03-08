@@ -248,6 +248,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "binderbinder"
 version = "0.1.0"
+source = "git+https://github.com/Technobaboo/binderbinder#ecd02685806ef619a1341d0dad1a0151634f1ebe"
 dependencies = [
  "async-trait",
  "bitflags 2.10.0",
@@ -989,6 +990,7 @@ dependencies = [
 [[package]]
 name = "gluon-binder"
 version = "0.1.0"
+source = "git+https://github.com/Technobaboo/gluon#8d925484ebc21d42c5e73ce99c8e6f72adb7fab1"
 dependencies = [
  "binderbinder",
  "chumsky",
@@ -997,6 +999,7 @@ dependencies = [
 [[package]]
 name = "gluon-codegen-rust"
 version = "0.1.0"
+source = "git+https://github.com/Technobaboo/gluon#8d925484ebc21d42c5e73ce99c8e6f72adb7fab1"
 dependencies = [
  "convert_case 0.11.0",
  "gluon-binder",
@@ -1008,6 +1011,7 @@ dependencies = [
 [[package]]
 name = "gluon-wire"
 version = "0.1.0"
+source = "git+https://github.com/Technobaboo/gluon#8d925484ebc21d42c5e73ce99c8e6f72adb7fab1"
 dependencies = [
  "binderbinder",
  "thiserror 2.0.18",
@@ -1699,6 +1703,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "pion-binder"
 version = "0.1.0"
+source = "git+https://github.com/Technobaboo/pion#af700bdacce4e3567221479292fe11bc781f42e5"
 dependencies = [
  "async-trait",
  "binderbinder",

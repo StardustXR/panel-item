@@ -2,11 +2,13 @@
 interface PanelItem {
 	register_xkb_keymap(xkb_keymap: String) -> (id: KeymapId)
 
-	absolute_pointer_motion(surface: SurfaceId, position: UVec2)
-	relative_pointer_motion(surface: SurfaceId, delta: UVec2)
+	absolute_pointer_motion(surface: SurfaceId, position: Vec2)
+	relative_pointer_motion(surface: SurfaceId, delta: Vec2)
 	// uses event ids from `input_event_codes.h`
 	pointer_button(surface: SurfaceId, button: u32, pressed: bool)
-	pointer_scroll(surface: SurfaceId, delta: Vec2, source: ScrollSource)
+	// TODO: expose stop timestamp?
+	pointer_scroll_pixels(surface: SurfaceId, delta: Vec2, source: ScrollSource)
+	pointer_scroll_discrete(surface: SurfaceId, delta: Vec2, source: ScrollSource)
 	// TODO: expose stop timestamp?
 	pointer_scroll_stop(surface: SurfaceId)
 	key(surface: SurfaceId, keymap: KeymapId, key: u32, pressed: bool)
@@ -25,7 +27,7 @@ interface PanelItem {
 /// PanelShell
 interface PanelShell {
 	update_cursor_dmatex(dmatex_uid: u64, acquire_point: u64, release_point: u64)
-	update_surface_dmatex(surface: SurfaceId, dmatex_uid: u64, acquire_point: u64, release_point: u64)
+	update_surface_dmatex(surface: SurfaceId, dmatex_uid: u64, acquire_point: u64, release_point: u64, opaque: bool)
 
 	toplevel_fullscreen(fullscreen_active: bool)
 	toplevel_title(title: String)
@@ -73,12 +75,12 @@ struct FieldRefIdClone {
 
 /// SurfaceId
 enum SurfaceIdCloneHash {
-	TopLevel,
+	Toplevel,
 	Child { id: u64 },
 }
 
 /// ToplevelState
-struct ToplevelState {
+struct ToplevelStateClone {
 	parent: Option<u64>,
 	title: Option<String>,
 	app_id: Option<String>,
@@ -88,7 +90,7 @@ struct ToplevelState {
 }
 
 /// ChildState
-struct ChildState {
+struct ChildStateClone {
 	id: u64,
 	parent: SurfaceId,
 	geometry: Geometry,
@@ -97,7 +99,7 @@ struct ChildState {
 }
 
 /// PanelItemInitData
-struct PanelItemInitData {
+struct PanelItemInitDataClone {
 	cursor: Option<Geometry>,
 	toplevel: ToplevelState,
 	children: Vec<ChildState>,

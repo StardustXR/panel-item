@@ -1,6 +1,6 @@
 use mint::{IntoMint, Vector2};
 
-use crate::protocol::{IVec2, UVec2, Vec2};
+use crate::protocol::{Geometry, IVec2, UVec2, Vec2};
 macro_rules! impl_mint {
     ($proto:ty, $mint:ty, $($field:ident),*) => {
 
@@ -17,8 +17,11 @@ impl From<$mint> for $proto {
         Self {$($field: v.$field),*}
     }
 }
+impl Copy for $proto {}
     };
 }
 impl_mint!(UVec2, Vector2<u32>, x, y);
 impl_mint!(IVec2, Vector2<i32>, x, y);
 impl_mint!(Vec2, Vector2<f32>, x, y);
+
+impl Copy for Geometry {}
