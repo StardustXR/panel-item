@@ -989,7 +989,7 @@ dependencies = [
 [[package]]
 name = "gluon-codegen-rust"
 version = "0.1.0"
-source = "git+https://github.com/Technobaboo/gluon#090b02404b76909633ee646ec367209b91d9a03d"
+source = "git+https://github.com/Technobaboo/gluon#8b7be96213e3d649b2a87f0cc921ac3d2e8facad"
 dependencies = [
  "convert_case 0.11.0",
  "gluon-parser",
@@ -1001,7 +1001,7 @@ dependencies = [
 [[package]]
 name = "gluon-parser"
 version = "0.1.0"
-source = "git+https://github.com/Technobaboo/gluon#090b02404b76909633ee646ec367209b91d9a03d"
+source = "git+https://github.com/Technobaboo/gluon#8b7be96213e3d649b2a87f0cc921ac3d2e8facad"
 dependencies = [
  "binderbinder",
  "chumsky",
@@ -1010,7 +1010,7 @@ dependencies = [
 [[package]]
 name = "gluon-wire"
 version = "0.1.0"
-source = "git+https://github.com/Technobaboo/gluon#090b02404b76909633ee646ec367209b91d9a03d"
+source = "git+https://github.com/Technobaboo/gluon#8b7be96213e3d649b2a87f0cc921ac3d2e8facad"
 dependencies = [
  "binderbinder",
  "thiserror 2.0.18",
