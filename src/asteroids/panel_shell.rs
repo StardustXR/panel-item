@@ -1,7 +1,6 @@
 use std::sync::{Arc, Mutex};
 
 use binderbinder::{TransactionHandler, binder_object::BinderObject};
-use derive_setters::Setters;
 use derive_where::derive_where;
 use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
 use mint::Vector2;
@@ -21,10 +20,7 @@ use crate::protocol::{
 };
 
 #[derive_where(Debug)]
-#[derive(Setters)]
-#[setters(into, strip_option)]
 pub struct PanelShell<State: ValidState> {
-    #[setters(skip)]
     handler: Arc<BinderObject<PanelShellHandler>>,
     on_toplevel_resolution_changed:
         FnWrapper<dyn Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync>,
@@ -305,5 +301,39 @@ impl TransactionHandler for PanelShellHandler {
     async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
         let mut data = GluonDataReader::from_payload(transaction.payload);
         self.dispatch_one_way(transaction.code, &mut data).await
+    }
+}
+impl<State: ValidState> PanelShell<State> {
+    pub fn on_toplevel_resolution_changed(mut self, func: impl Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync + 'static) -> Self {
+        self.on_toplevel_resolution_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn on_toplevel_fullscreen_changed(mut self, func: impl Fn(&mut State, &PanelItem, bool) + Send + Sync + 'static) -> Self {
+        self.on_toplevel_fullscreen_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn on_toplevel_title_changed(mut self, func: impl Fn(&mut State, &PanelItem, String) + Send + Sync + 'static) -> Self {
+        self.on_toplevel_title_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn on_toplevel_app_id_changed(mut self, func: impl Fn(&mut State, &PanelItem, String) + Send + Sync + 'static) -> Self {
+        self.on_toplevel_app_id_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn cursor_visuals_changed(mut self, func: impl Fn(&mut State, &PanelItem, Option<Geometry>) + Send + Sync + 'static) -> Self {
+        self.cursor_visuals_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn new_child(mut self, func: impl Fn(&mut State, &PanelItem, ChildState) + Send + Sync + 'static) -> Self {
+        self.new_child = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn child_moved(mut self, func: impl Fn(&mut State, &PanelItem, u64, Geometry) + Send + Sync + 'static) -> Self {
+        self.child_moved = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn child_removed(mut self, func: impl Fn(&mut State, &PanelItem, u64) + Send + Sync + 'static) -> Self {
+        self.child_removed = FnWrapper(Box::new(func));
+        self
     }
 }

@@ -8,7 +8,6 @@ use binderbinder::{
     TransactionHandler,
     binder_object::{BinderObject, ToBinderObjectOrRef},
 };
-use derive_setters::Setters;
 use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
 use pion_binder::PionBinderDevice;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
@@ -28,15 +27,26 @@ use crate::{
 };
 
 #[derive_where::derive_where(Debug)]
-#[derive(Setters)]
-#[setters(into, strip_option)]
 pub struct PanelItemAcceptorElement<State: ValidState> {
-    #[setters(skip)]
     binder_dev: PionBinderDevice,
     transform: Transform,
     shape: Shape,
     on_create_item:
         FnWrapper<dyn Fn(&mut State, Arc<BinderObject<PanelShellHandler>>) + Send + Sync>,
+}
+impl<State: ValidState> PanelItemAcceptorElement<State> {
+    pub fn new(
+        binder_dev: &PionBinderDevice,
+        shape: Shape,
+        on_accept: impl Fn(&mut State, Arc<BinderObject<PanelShellHandler>>) + Send + Sync + 'static,
+    ) -> Self {
+        Self {
+            binder_dev: binder_dev.clone(),
+            transform: Transform::none(),
+            shape,
+            on_create_item: FnWrapper(Box::new(on_accept)),
+        }
+    }
 }
 
 impl<State: ValidState> CustomElement<State> for PanelItemAcceptorElement<State> {
