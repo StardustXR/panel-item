@@ -1014,57 +1014,96 @@ pub trait PanelItemHandler: binderbinder::device::TransactionHandler + Send + Sy
         }
     }
 }
-///ToplevelState
-#[derive(Clone, Debug)]
-pub struct ToplevelState {
-    pub parent: Option<u64>,
-    pub title: Option<String>,
-    pub app_id: Option<String>,
-    pub size: UVec2,
-    pub min_size: Option<UVec2>,
-    pub max_size: Option<UVec2>,
+///UVec2
+#[derive(Clone, Hash, Debug)]
+pub struct UVec2 {
+    pub x: u32,
+    pub y: u32,
 }
-impl gluon_wire::GluonConvertable for ToplevelState {
+impl gluon_wire::GluonConvertable for UVec2 {
     fn write<'a, 'b: 'a>(
         &'b self,
         data: &mut gluon_wire::GluonDataBuilder<'a>,
     ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.parent.write(data)?;
-        self.title.write(data)?;
-        self.app_id.write(data)?;
-        self.size.write(data)?;
-        self.min_size.write(data)?;
-        self.max_size.write(data)?;
+        self.x.write(data)?;
+        self.y.write(data)?;
         Ok(())
     }
     fn read(
         data: &mut gluon_wire::GluonDataReader,
     ) -> Result<Self, gluon_wire::GluonReadError> {
-        let parent = gluon_wire::GluonConvertable::read(data)?;
-        let title = gluon_wire::GluonConvertable::read(data)?;
-        let app_id = gluon_wire::GluonConvertable::read(data)?;
-        let size = gluon_wire::GluonConvertable::read(data)?;
-        let min_size = gluon_wire::GluonConvertable::read(data)?;
-        let max_size = gluon_wire::GluonConvertable::read(data)?;
-        Ok(ToplevelState {
-            parent,
-            title,
-            app_id,
-            size,
-            min_size,
-            max_size,
-        })
+        let x = gluon_wire::GluonConvertable::read(data)?;
+        let y = gluon_wire::GluonConvertable::read(data)?;
+        Ok(UVec2 { x, y })
     }
     fn write_owned(
         self,
         data: &mut gluon_wire::GluonDataBuilder<'_>,
     ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.parent.write_owned(data)?;
-        self.title.write_owned(data)?;
-        self.app_id.write_owned(data)?;
+        self.x.write_owned(data)?;
+        self.y.write_owned(data)?;
+        Ok(())
+    }
+}
+///iVec2
+#[derive(Clone, Hash, Debug)]
+pub struct IVec2 {
+    pub x: i32,
+    pub y: i32,
+}
+impl gluon_wire::GluonConvertable for IVec2 {
+    fn write<'a, 'b: 'a>(
+        &'b self,
+        data: &mut gluon_wire::GluonDataBuilder<'a>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.x.write(data)?;
+        self.y.write(data)?;
+        Ok(())
+    }
+    fn read(
+        data: &mut gluon_wire::GluonDataReader,
+    ) -> Result<Self, gluon_wire::GluonReadError> {
+        let x = gluon_wire::GluonConvertable::read(data)?;
+        let y = gluon_wire::GluonConvertable::read(data)?;
+        Ok(IVec2 { x, y })
+    }
+    fn write_owned(
+        self,
+        data: &mut gluon_wire::GluonDataBuilder<'_>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.x.write_owned(data)?;
+        self.y.write_owned(data)?;
+        Ok(())
+    }
+}
+///Rect
+#[derive(Clone, Debug)]
+pub struct Rect {
+    pub origin: Vec2,
+    pub size: Vec2,
+}
+impl gluon_wire::GluonConvertable for Rect {
+    fn write<'a, 'b: 'a>(
+        &'b self,
+        data: &mut gluon_wire::GluonDataBuilder<'a>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.origin.write(data)?;
+        self.size.write(data)?;
+        Ok(())
+    }
+    fn read(
+        data: &mut gluon_wire::GluonDataReader,
+    ) -> Result<Self, gluon_wire::GluonReadError> {
+        let origin = gluon_wire::GluonConvertable::read(data)?;
+        let size = gluon_wire::GluonConvertable::read(data)?;
+        Ok(Rect { origin, size })
+    }
+    fn write_owned(
+        self,
+        data: &mut gluon_wire::GluonDataBuilder<'_>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.origin.write_owned(data)?;
         self.size.write_owned(data)?;
-        self.min_size.write_owned(data)?;
-        self.max_size.write_owned(data)?;
         Ok(())
     }
 }
@@ -1092,6 +1131,37 @@ impl gluon_wire::GluonConvertable for FieldRefId {
         data: &mut gluon_wire::GluonDataBuilder<'_>,
     ) -> Result<(), gluon_wire::GluonWriteError> {
         self.id.write_owned(data)?;
+        Ok(())
+    }
+}
+///Geometry
+#[derive(Clone, Hash, Debug)]
+pub struct Geometry {
+    pub origin: IVec2,
+    pub size: UVec2,
+}
+impl gluon_wire::GluonConvertable for Geometry {
+    fn write<'a, 'b: 'a>(
+        &'b self,
+        data: &mut gluon_wire::GluonDataBuilder<'a>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.origin.write(data)?;
+        self.size.write(data)?;
+        Ok(())
+    }
+    fn read(
+        data: &mut gluon_wire::GluonDataReader,
+    ) -> Result<Self, gluon_wire::GluonReadError> {
+        let origin = gluon_wire::GluonConvertable::read(data)?;
+        let size = gluon_wire::GluonConvertable::read(data)?;
+        Ok(Geometry { origin, size })
+    }
+    fn write_owned(
+        self,
+        data: &mut gluon_wire::GluonDataBuilder<'_>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.origin.write_owned(data)?;
+        self.size.write_owned(data)?;
         Ok(())
     }
 }
@@ -1149,197 +1219,57 @@ impl gluon_wire::GluonConvertable for SpatialRefId {
         Ok(())
     }
 }
-///Geometry
-#[derive(Clone, Hash, Debug)]
-pub struct Geometry {
-    pub origin: IVec2,
+///ToplevelState
+#[derive(Clone, Debug)]
+pub struct ToplevelState {
+    pub parent: Option<u64>,
+    pub title: Option<String>,
+    pub app_id: Option<String>,
     pub size: UVec2,
+    pub min_size: Option<UVec2>,
+    pub max_size: Option<UVec2>,
 }
-impl gluon_wire::GluonConvertable for Geometry {
+impl gluon_wire::GluonConvertable for ToplevelState {
     fn write<'a, 'b: 'a>(
         &'b self,
         data: &mut gluon_wire::GluonDataBuilder<'a>,
     ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.origin.write(data)?;
+        self.parent.write(data)?;
+        self.title.write(data)?;
+        self.app_id.write(data)?;
         self.size.write(data)?;
+        self.min_size.write(data)?;
+        self.max_size.write(data)?;
         Ok(())
     }
     fn read(
         data: &mut gluon_wire::GluonDataReader,
     ) -> Result<Self, gluon_wire::GluonReadError> {
-        let origin = gluon_wire::GluonConvertable::read(data)?;
+        let parent = gluon_wire::GluonConvertable::read(data)?;
+        let title = gluon_wire::GluonConvertable::read(data)?;
+        let app_id = gluon_wire::GluonConvertable::read(data)?;
         let size = gluon_wire::GluonConvertable::read(data)?;
-        Ok(Geometry { origin, size })
-    }
-    fn write_owned(
-        self,
-        data: &mut gluon_wire::GluonDataBuilder<'_>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.origin.write_owned(data)?;
-        self.size.write_owned(data)?;
-        Ok(())
-    }
-}
-///Vec2
-#[derive(Clone, Debug)]
-pub struct Vec2 {
-    pub x: f32,
-    pub y: f32,
-}
-impl gluon_wire::GluonConvertable for Vec2 {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        data: &mut gluon_wire::GluonDataBuilder<'a>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.x.write(data)?;
-        self.y.write(data)?;
-        Ok(())
-    }
-    fn read(
-        data: &mut gluon_wire::GluonDataReader,
-    ) -> Result<Self, gluon_wire::GluonReadError> {
-        let x = gluon_wire::GluonConvertable::read(data)?;
-        let y = gluon_wire::GluonConvertable::read(data)?;
-        Ok(Vec2 { x, y })
-    }
-    fn write_owned(
-        self,
-        data: &mut gluon_wire::GluonDataBuilder<'_>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.x.write_owned(data)?;
-        self.y.write_owned(data)?;
-        Ok(())
-    }
-}
-///iVec2
-#[derive(Clone, Hash, Debug)]
-pub struct IVec2 {
-    pub x: i32,
-    pub y: i32,
-}
-impl gluon_wire::GluonConvertable for IVec2 {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        data: &mut gluon_wire::GluonDataBuilder<'a>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.x.write(data)?;
-        self.y.write(data)?;
-        Ok(())
-    }
-    fn read(
-        data: &mut gluon_wire::GluonDataReader,
-    ) -> Result<Self, gluon_wire::GluonReadError> {
-        let x = gluon_wire::GluonConvertable::read(data)?;
-        let y = gluon_wire::GluonConvertable::read(data)?;
-        Ok(IVec2 { x, y })
-    }
-    fn write_owned(
-        self,
-        data: &mut gluon_wire::GluonDataBuilder<'_>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.x.write_owned(data)?;
-        self.y.write_owned(data)?;
-        Ok(())
-    }
-}
-///PanelItemInitData
-#[derive(Clone, Debug)]
-pub struct PanelItemInitData {
-    pub cursor: Option<Geometry>,
-    pub toplevel: ToplevelState,
-    pub children: Vec<ChildState>,
-}
-impl gluon_wire::GluonConvertable for PanelItemInitData {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        data: &mut gluon_wire::GluonDataBuilder<'a>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.cursor.write(data)?;
-        self.toplevel.write(data)?;
-        self.children.write(data)?;
-        Ok(())
-    }
-    fn read(
-        data: &mut gluon_wire::GluonDataReader,
-    ) -> Result<Self, gluon_wire::GluonReadError> {
-        let cursor = gluon_wire::GluonConvertable::read(data)?;
-        let toplevel = gluon_wire::GluonConvertable::read(data)?;
-        let children = gluon_wire::GluonConvertable::read(data)?;
-        Ok(PanelItemInitData {
-            cursor,
-            toplevel,
-            children,
+        let min_size = gluon_wire::GluonConvertable::read(data)?;
+        let max_size = gluon_wire::GluonConvertable::read(data)?;
+        Ok(ToplevelState {
+            parent,
+            title,
+            app_id,
+            size,
+            min_size,
+            max_size,
         })
     }
     fn write_owned(
         self,
         data: &mut gluon_wire::GluonDataBuilder<'_>,
     ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.cursor.write_owned(data)?;
-        self.toplevel.write_owned(data)?;
-        self.children.write_owned(data)?;
-        Ok(())
-    }
-}
-///UVec2
-#[derive(Clone, Hash, Debug)]
-pub struct UVec2 {
-    pub x: u32,
-    pub y: u32,
-}
-impl gluon_wire::GluonConvertable for UVec2 {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        data: &mut gluon_wire::GluonDataBuilder<'a>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.x.write(data)?;
-        self.y.write(data)?;
-        Ok(())
-    }
-    fn read(
-        data: &mut gluon_wire::GluonDataReader,
-    ) -> Result<Self, gluon_wire::GluonReadError> {
-        let x = gluon_wire::GluonConvertable::read(data)?;
-        let y = gluon_wire::GluonConvertable::read(data)?;
-        Ok(UVec2 { x, y })
-    }
-    fn write_owned(
-        self,
-        data: &mut gluon_wire::GluonDataBuilder<'_>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.x.write_owned(data)?;
-        self.y.write_owned(data)?;
-        Ok(())
-    }
-}
-///Rect
-#[derive(Clone, Debug)]
-pub struct Rect {
-    pub origin: Vec2,
-    pub size: Vec2,
-}
-impl gluon_wire::GluonConvertable for Rect {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        data: &mut gluon_wire::GluonDataBuilder<'a>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.origin.write(data)?;
-        self.size.write(data)?;
-        Ok(())
-    }
-    fn read(
-        data: &mut gluon_wire::GluonDataReader,
-    ) -> Result<Self, gluon_wire::GluonReadError> {
-        let origin = gluon_wire::GluonConvertable::read(data)?;
-        let size = gluon_wire::GluonConvertable::read(data)?;
-        Ok(Rect { origin, size })
-    }
-    fn write_owned(
-        self,
-        data: &mut gluon_wire::GluonDataBuilder<'_>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        self.origin.write_owned(data)?;
+        self.parent.write_owned(data)?;
+        self.title.write_owned(data)?;
+        self.app_id.write_owned(data)?;
         self.size.write_owned(data)?;
+        self.min_size.write_owned(data)?;
+        self.max_size.write_owned(data)?;
         Ok(())
     }
 }
@@ -1389,6 +1319,139 @@ impl gluon_wire::GluonConvertable for ChildState {
         self.geometry.write_owned(data)?;
         self.z_order.write_owned(data)?;
         self.input_regions.write_owned(data)?;
+        Ok(())
+    }
+}
+///PanelItemInitData
+#[derive(Clone, Debug)]
+pub struct PanelItemInitData {
+    pub cursor: Option<Geometry>,
+    pub toplevel: ToplevelState,
+    pub children: Vec<ChildState>,
+}
+impl gluon_wire::GluonConvertable for PanelItemInitData {
+    fn write<'a, 'b: 'a>(
+        &'b self,
+        data: &mut gluon_wire::GluonDataBuilder<'a>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.cursor.write(data)?;
+        self.toplevel.write(data)?;
+        self.children.write(data)?;
+        Ok(())
+    }
+    fn read(
+        data: &mut gluon_wire::GluonDataReader,
+    ) -> Result<Self, gluon_wire::GluonReadError> {
+        let cursor = gluon_wire::GluonConvertable::read(data)?;
+        let toplevel = gluon_wire::GluonConvertable::read(data)?;
+        let children = gluon_wire::GluonConvertable::read(data)?;
+        Ok(PanelItemInitData {
+            cursor,
+            toplevel,
+            children,
+        })
+    }
+    fn write_owned(
+        self,
+        data: &mut gluon_wire::GluonDataBuilder<'_>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.cursor.write_owned(data)?;
+        self.toplevel.write_owned(data)?;
+        self.children.write_owned(data)?;
+        Ok(())
+    }
+}
+///Vec2
+#[derive(Clone, Debug)]
+pub struct Vec2 {
+    pub x: f32,
+    pub y: f32,
+}
+impl gluon_wire::GluonConvertable for Vec2 {
+    fn write<'a, 'b: 'a>(
+        &'b self,
+        data: &mut gluon_wire::GluonDataBuilder<'a>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.x.write(data)?;
+        self.y.write(data)?;
+        Ok(())
+    }
+    fn read(
+        data: &mut gluon_wire::GluonDataReader,
+    ) -> Result<Self, gluon_wire::GluonReadError> {
+        let x = gluon_wire::GluonConvertable::read(data)?;
+        let y = gluon_wire::GluonConvertable::read(data)?;
+        Ok(Vec2 { x, y })
+    }
+    fn write_owned(
+        self,
+        data: &mut gluon_wire::GluonDataBuilder<'_>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        self.x.write_owned(data)?;
+        self.y.write_owned(data)?;
+        Ok(())
+    }
+}
+///ScrollSource
+#[derive(Clone, Hash, Debug)]
+pub enum ScrollSource {
+    Wheel,
+    Touch,
+    Continuous,
+    WheelTilt,
+}
+impl gluon_wire::GluonConvertable for ScrollSource {
+    fn write<'a, 'b: 'a>(
+        &'b self,
+        data: &mut gluon_wire::GluonDataBuilder<'a>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        match self {
+            ScrollSource::Wheel {} => {
+                data.write_u16(0u16)?;
+            }
+            ScrollSource::Touch {} => {
+                data.write_u16(1u16)?;
+            }
+            ScrollSource::Continuous {} => {
+                data.write_u16(2u16)?;
+            }
+            ScrollSource::WheelTilt {} => {
+                data.write_u16(3u16)?;
+            }
+        };
+        Ok(())
+    }
+    fn read(
+        data: &mut gluon_wire::GluonDataReader,
+    ) -> Result<Self, gluon_wire::GluonReadError> {
+        Ok(
+            match data.read_u16()? {
+                0u16 => ScrollSource::Wheel,
+                1u16 => ScrollSource::Touch,
+                2u16 => ScrollSource::Continuous,
+                3u16 => ScrollSource::WheelTilt,
+                v => return Err(gluon_wire::GluonReadError::UnknownEnumVariant(v)),
+            },
+        )
+    }
+    fn write_owned(
+        self,
+        data: &mut gluon_wire::GluonDataBuilder<'_>,
+    ) -> Result<(), gluon_wire::GluonWriteError> {
+        match self {
+            ScrollSource::Wheel {} => {
+                data.write_u16(0u16)?;
+            }
+            ScrollSource::Touch {} => {
+                data.write_u16(1u16)?;
+            }
+            ScrollSource::Continuous {} => {
+                data.write_u16(2u16)?;
+            }
+            ScrollSource::WheelTilt {} => {
+                data.write_u16(3u16)?;
+            }
+        };
         Ok(())
     }
 }
@@ -1499,69 +1562,6 @@ impl gluon_wire::GluonConvertable for SurfaceUpdateTarget {
             }
             SurfaceUpdateTarget::Cursor {} => {
                 data.write_u16(2u16)?;
-            }
-        };
-        Ok(())
-    }
-}
-///ScrollSource
-#[derive(Clone, Hash, Debug)]
-pub enum ScrollSource {
-    Wheel,
-    Touch,
-    Continuous,
-    WheelTilt,
-}
-impl gluon_wire::GluonConvertable for ScrollSource {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        data: &mut gluon_wire::GluonDataBuilder<'a>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        match self {
-            ScrollSource::Wheel {} => {
-                data.write_u16(0u16)?;
-            }
-            ScrollSource::Touch {} => {
-                data.write_u16(1u16)?;
-            }
-            ScrollSource::Continuous {} => {
-                data.write_u16(2u16)?;
-            }
-            ScrollSource::WheelTilt {} => {
-                data.write_u16(3u16)?;
-            }
-        };
-        Ok(())
-    }
-    fn read(
-        data: &mut gluon_wire::GluonDataReader,
-    ) -> Result<Self, gluon_wire::GluonReadError> {
-        Ok(
-            match data.read_u16()? {
-                0u16 => ScrollSource::Wheel,
-                1u16 => ScrollSource::Touch,
-                2u16 => ScrollSource::Continuous,
-                3u16 => ScrollSource::WheelTilt,
-                v => return Err(gluon_wire::GluonReadError::UnknownEnumVariant(v)),
-            },
-        )
-    }
-    fn write_owned(
-        self,
-        data: &mut gluon_wire::GluonDataBuilder<'_>,
-    ) -> Result<(), gluon_wire::GluonWriteError> {
-        match self {
-            ScrollSource::Wheel {} => {
-                data.write_u16(0u16)?;
-            }
-            ScrollSource::Touch {} => {
-                data.write_u16(1u16)?;
-            }
-            ScrollSource::Continuous {} => {
-                data.write_u16(2u16)?;
-            }
-            ScrollSource::WheelTilt {} => {
-                data.write_u16(3u16)?;
             }
         };
         Ok(())

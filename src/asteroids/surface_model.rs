@@ -1,12 +1,12 @@
 use std::sync::{Arc, Mutex};
 
 use binderbinder::binder_object::BinderObject;
-use stardust_xr_asteroids::{CustomElement, ValidState};
+use stardust_xr_asteroids::{CustomElement, Transformable, ValidState};
 use stardust_xr_fusion::{
     AbortOnDrop,
     drawable::{self, DmatexSubmitInfo, MaterialParameter, Model, ModelPart, ModelPartAspect},
     node::{NodeError, NodeResult, NodeType},
-    spatial::{SpatialRef, Transform},
+    spatial::{Spatial, SpatialRef, Transform},
     values::ResourceID,
 };
 
@@ -53,10 +53,9 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
     }
 
     fn diff(&self, old_self: &Self, inner: &mut Self::Inner, _resource: &mut Self::Resource) {
+        self.apply_transform(old_self, &inner.root);
         if self.model_resource != old_self.model_resource {
-            if let Ok(new) = SurfaceModelInner::new(&inner.parent, self) {
-                *inner = new;
-            }
+            _ = inner.recreate_model(self);
         } else if self.part_path != old_self.part_path {
             if let Ok(new_part) = inner.model.part(&self.part_path) {
                 *inner.part.lock().unwrap() = new_part;
@@ -110,24 +109,42 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
     }
 
     fn spatial_aspect(&self, inner: &Self::Inner) -> stardust_xr_fusion::spatial::SpatialRef {
-        inner.model.clone().as_spatial_ref()
+        inner.root.clone().as_spatial_ref()
+    }
+}
+impl Transformable for SurfaceModel {
+    fn transform(&self) -> &Transform {
+        &self.transform
+    }
+
+    fn transform_mut(&mut self) -> &mut Transform {
+        &mut self.transform
     }
 }
 pub struct SurfaceModelInner {
+    root: Spatial,
     part: Arc<Mutex<ModelPart>>,
     model: Model,
-    parent: SpatialRef,
     task: Option<AbortOnDrop>,
 }
 impl SurfaceModelInner {
     fn new(parent: &SpatialRef, info: &SurfaceModel) -> NodeResult<Self> {
-        let model = Model::create(parent, info.transform, &info.model_resource)?;
+        let root = Spatial::create(parent, Transform::identity())?;
+        let model = Model::create(&root, info.transform, &info.model_resource)?;
         let part = model.part(&info.part_path)?;
         Ok(SurfaceModelInner {
+            root,
             part: Arc::new(Mutex::new(part)),
-            parent: parent.clone(),
             model,
             task: None,
         })
+    }
+    fn recreate_model(&mut self, info: &SurfaceModel) -> NodeResult<()> {
+        let model = Model::create(&self.root, info.transform, &info.model_resource)?;
+        let part = model.part(&info.part_path)?;
+        self.model = model;
+        *self.part.lock().unwrap() = part;
+        self.task.take();
+        Ok(())
     }
 }
