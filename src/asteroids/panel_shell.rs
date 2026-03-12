@@ -4,25 +4,30 @@ use binderbinder::{TransactionHandler, binder_object::BinderObject};
 use derive_setters::Setters;
 use derive_where::derive_where;
 use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
-use rand::random;
+use mint::Vector2;
+use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
-    drawable::DmatexSubmitInfo,
-    node::{NodeError, NodeType},
+    node::NodeError,
     spatial::{Spatial, SpatialAspect, SpatialRef, Transform},
 };
-use tokio::sync::{RwLock, mpsc};
+use tokio::sync::{
+    RwLock,
+    mpsc::{self, unbounded_channel},
+};
 
-use crate::protocol::{ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceId};
+use crate::protocol::{
+    ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget, UVec2,
+};
 
 #[derive_where(Debug)]
 #[derive(Setters)]
 #[setters(into, strip_option)]
 pub struct PanelShell<State: ValidState> {
+    #[setters(skip)]
     handler: Arc<BinderObject<PanelShellHandler>>,
-    update_cursor_dmatex: FnWrapper<dyn Fn(&mut State, &PanelItem, DmatexSubmitInfo) + Send + Sync>,
-    update_surface_dmatex:
-        FnWrapper<dyn Fn(&mut State, &PanelItem, SurfaceId, DmatexSubmitInfo, bool) + Send + Sync>,
+    on_toplevel_resolution_changed:
+        FnWrapper<dyn Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync>,
     on_toplevel_fullscreen_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, bool) + Send + Sync>,
     on_toplevel_title_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, String) + Send + Sync>,
     on_toplevel_app_id_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, String) + Send + Sync>,
@@ -34,18 +39,10 @@ pub struct PanelShell<State: ValidState> {
     transform: Transform,
 }
 impl<State: ValidState> PanelShell<State> {
-    pub fn new(
-        handler: &Arc<BinderObject<PanelShellHandler>>,
-        update_surface_dmatex: impl Fn(&mut State, &PanelItem, SurfaceId, DmatexSubmitInfo, bool)
-        + Send
-        + Sync
-        + 'static,
-        update_cursor_dmatex: impl Fn(&mut State, &PanelItem, DmatexSubmitInfo) + Send + Sync + 'static,
-    ) -> Self {
+    pub fn new(handler: &Arc<BinderObject<PanelShellHandler>>) -> Self {
         Self {
             handler: handler.clone(),
-            update_cursor_dmatex: FnWrapper(Box::new(update_cursor_dmatex)),
-            update_surface_dmatex: FnWrapper(Box::new(update_surface_dmatex)),
+            on_toplevel_resolution_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_fullscreen_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_title_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_app_id_changed: FnWrapper(Box::new(|_, _, _| {})),
@@ -88,58 +85,10 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
         _context: &stardust_xr_asteroids::Context,
         _info: &stardust_xr_fusion::root::FrameInfo,
         state: &mut State,
-        inner: &mut Self::Inner,
+        _inner: &mut Self::Inner,
     ) {
         while let Ok(event) = self.handler.rx.lock().unwrap().try_recv() {
             match event {
-                PanelShellEvent::UpdateCursorDmatex {
-                    dmatex_uid,
-                    acquire_point,
-                    release_point,
-                } => {
-                    let dmatex_id: u64 = random();
-                    stardust_xr_fusion::drawable::import_dmatex_uid(
-                        &inner.client(),
-                        dmatex_id,
-                        dmatex_uid,
-                    )
-                    .unwrap();
-                    self.update_cursor_dmatex.0(
-                        state,
-                        &self.handler.item,
-                        DmatexSubmitInfo {
-                            dmatex_id,
-                            acquire_point,
-                            release_point,
-                        },
-                    )
-                }
-                PanelShellEvent::UpdateSurfaceDmatex {
-                    surface,
-                    dmatex_uid,
-                    acquire_point,
-                    release_point,
-                    opaque,
-                } => {
-                    let dmatex_id: u64 = random();
-                    stardust_xr_fusion::drawable::import_dmatex_uid(
-                        &inner.client(),
-                        dmatex_id,
-                        dmatex_uid,
-                    )
-                    .unwrap();
-                    self.update_surface_dmatex.0(
-                        state,
-                        &self.handler.item,
-                        surface,
-                        DmatexSubmitInfo {
-                            dmatex_id,
-                            acquire_point,
-                            release_point,
-                        },
-                        opaque,
-                    )
-                }
                 PanelShellEvent::ToplevelFullscreen { fullscreen_active } => {
                     self.on_toplevel_fullscreen_changed.0(
                         state,
@@ -165,6 +114,9 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
                 PanelShellEvent::DestroyChild { child_id } => {
                     self.child_removed.0(state, &self.handler.item, child_id)
                 }
+                PanelShellEvent::ToplevelResized { new_size } => {
+                    self.on_toplevel_resolution_changed.0(state, &self.handler.item, new_size)
+                }
             }
         }
     }
@@ -183,8 +135,19 @@ impl<State: ValidState> Transformable for PanelShell<State> {
     }
 }
 
+pub(super) struct SurfaceUpdate {
+    pub(super) dmatex_uid: u64,
+    pub(super) acquire_point: u64,
+    pub(super) release_point: u64,
+    pub(super) opaque: bool,
+}
+
 #[derive(Debug)]
 pub struct PanelShellHandler {
+    pub(super) surface_rx: Arc<
+        RwLock<FxHashMap<SurfaceUpdateTarget, Arc<RwLock<mpsc::UnboundedReceiver<SurfaceUpdate>>>>>,
+    >,
+    surface_tx: Arc<RwLock<FxHashMap<SurfaceUpdateTarget, mpsc::UnboundedSender<SurfaceUpdate>>>>,
     tx: mpsc::UnboundedSender<PanelShellEvent>,
     rx: Mutex<mpsc::UnboundedReceiver<PanelShellEvent>>,
     item_output_spatial: Spatial,
@@ -193,6 +156,20 @@ pub struct PanelShellHandler {
 }
 impl PanelShellHandler {
     pub fn new(item: PanelItem, item_output_spatial: Spatial) -> Self {
+        let (toplevel_tx, toplevel_rx) = mpsc::unbounded_channel();
+        let (cursor_tx, cursor_rx) = mpsc::unbounded_channel();
+        let mut surface_tx = FxHashMap::default();
+        let mut surface_rx = FxHashMap::default();
+        surface_tx.insert(SurfaceUpdateTarget::Toplevel, toplevel_tx);
+        surface_rx.insert(
+            SurfaceUpdateTarget::Toplevel,
+            Arc::new(RwLock::new(toplevel_rx)),
+        );
+        surface_tx.insert(SurfaceUpdateTarget::Cursor, cursor_tx);
+        surface_rx.insert(
+            SurfaceUpdateTarget::Cursor,
+            Arc::new(RwLock::new(cursor_rx)),
+        );
         let (tx, rx) = mpsc::unbounded_channel();
         Self {
             tx,
@@ -200,6 +177,8 @@ impl PanelShellHandler {
             item_output_spatial,
             item,
             drop_notifs: RwLock::default(),
+            surface_rx: Arc::new(surface_rx.into()),
+            surface_tx: Arc::new(surface_tx.into()),
         }
     }
     pub fn item(&self) -> &PanelItem {
@@ -208,68 +187,42 @@ impl PanelShellHandler {
 }
 
 enum PanelShellEvent {
-    UpdateCursorDmatex {
-        dmatex_uid: u64,
-        acquire_point: u64,
-        release_point: u64,
-    },
-    UpdateSurfaceDmatex {
-        surface: SurfaceId,
-        dmatex_uid: u64,
-        acquire_point: u64,
-        release_point: u64,
-        opaque: bool,
-    },
-    ToplevelFullscreen {
-        fullscreen_active: bool,
-    },
-    ToplevelTitle {
-        title: String,
-    },
-    ToplevelAppId {
-        app_id: String,
-    },
-    SetCursorVisuals {
-        geometry: Option<Geometry>,
-    },
-    CreateChild {
-        child: ChildState,
-    },
-    MoveChild {
-        child_id: u64,
-        geometry: Geometry,
-    },
-    DestroyChild {
-        child_id: u64,
-    },
+    ToplevelResized { new_size: Vector2<u32> },
+    ToplevelFullscreen { fullscreen_active: bool },
+    ToplevelTitle { title: String },
+    ToplevelAppId { app_id: String },
+    SetCursorVisuals { geometry: Option<Geometry> },
+    CreateChild { child: ChildState },
+    MoveChild { child_id: u64, geometry: Geometry },
+    DestroyChild { child_id: u64 },
 }
 
 impl crate::protocol::PanelShellHandler for PanelShellHandler {
-    fn update_cursor_dmatex(&self, dmatex_uid: u64, acquire_point: u64, release_point: u64) {
-        self.tx
-            .send(PanelShellEvent::UpdateCursorDmatex {
-                dmatex_uid,
-                acquire_point,
-                release_point,
-            })
-            .unwrap();
-    }
-
     fn update_surface_dmatex(
         &self,
-        surface: SurfaceId,
+        surface: SurfaceUpdateTarget,
         dmatex_uid: u64,
         acquire_point: u64,
         release_point: u64,
         opaque: bool,
     ) {
+        let surface_tx = self.surface_tx.clone();
+        tokio::spawn(async move {
+            if let Some(tx) = surface_tx.read().await.get(&surface) {
+                _ = tx.send(SurfaceUpdate {
+                    dmatex_uid,
+                    acquire_point,
+                    release_point,
+                    opaque,
+                });
+            }
+        });
+    }
+
+    fn toplevel_resized(&self, new_size: UVec2) {
         self.tx
-            .send(PanelShellEvent::UpdateSurfaceDmatex {
-                surface,
-                dmatex_uid,
-                acquire_point,
-                release_point,
-                opaque,
+            .send(PanelShellEvent::ToplevelResized {
+                new_size: new_size.into(),
             })
             .unwrap();
     }
@@ -299,9 +252,20 @@ impl crate::protocol::PanelShellHandler for PanelShellHandler {
     }
 
     fn create_child(&self, child: ChildState) {
+        let surface_target = SurfaceUpdateTarget::Child { id: child.id };
         self.tx
             .send(PanelShellEvent::CreateChild { child })
             .unwrap();
+        let surface_tx = self.surface_tx.clone();
+        let surface_rx = self.surface_rx.clone();
+        tokio::spawn(async move {
+            let (tx, rx) = unbounded_channel();
+            surface_tx.write().await.insert(surface_target, tx);
+            surface_rx
+                .write()
+                .await
+                .insert(surface_target, Arc::new(RwLock::new(rx)));
+        });
     }
 
     fn move_child(&self, child_id: u64, geometry: Geometry) {
@@ -314,6 +278,13 @@ impl crate::protocol::PanelShellHandler for PanelShellHandler {
         self.tx
             .send(PanelShellEvent::DestroyChild { child_id })
             .unwrap();
+        let surface_target = SurfaceUpdateTarget::Child { id: child_id };
+        let surface_tx = self.surface_tx.clone();
+        let surface_rx = self.surface_rx.clone();
+        tokio::spawn(async move {
+            surface_tx.write().await.remove(&surface_target);
+            surface_rx.write().await.remove(&surface_target);
+        });
     }
 
     async fn drop_notification_requested(&self, notifier: gluon_wire::drop_tracking::DropNotifier) {

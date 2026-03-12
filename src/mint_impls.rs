@@ -1,6 +1,6 @@
 use mint::{IntoMint, Vector2};
 
-use crate::protocol::{Geometry, IVec2, SurfaceId, UVec2, Vec2};
+use crate::protocol::{Geometry, IVec2, SurfaceId, SurfaceUpdateTarget, UVec2, Vec2};
 macro_rules! impl_mint {
     ($proto:ty, $mint:ty, $($field:ident),*) => {
 
@@ -35,3 +35,23 @@ impl PartialEq for SurfaceId {
     }
 }
 impl Eq for SurfaceId {}
+
+impl Copy for SurfaceUpdateTarget {}
+impl PartialEq for SurfaceUpdateTarget {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Child { id: l_id }, Self::Child { id: r_id }) => l_id == r_id,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
+}
+impl Eq for SurfaceUpdateTarget {}
+
+impl From<SurfaceId> for SurfaceUpdateTarget {
+    fn from(value: SurfaceId) -> Self {
+        match value {
+            SurfaceId::Toplevel => Self::Toplevel,
+            SurfaceId::Child { id } => Self::Child { id },
+        }
+    }
+}

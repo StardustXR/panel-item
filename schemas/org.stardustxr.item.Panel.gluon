@@ -26,9 +26,9 @@ interface PanelItem {
 }
 /// PanelShell
 interface PanelShell {
-	update_cursor_dmatex(dmatex_uid: u64, acquire_point: u64, release_point: u64)
-	update_surface_dmatex(surface: SurfaceId, dmatex_uid: u64, acquire_point: u64, release_point: u64, opaque: bool)
+	update_surface_dmatex(surface: SurfaceUpdateTarget, dmatex_uid: u64, acquire_point: u64, release_point: u64, opaque: bool)
 
+	toplevel_resized(new_size: UVec2)
 	toplevel_fullscreen(fullscreen_active: bool)
 	toplevel_title(title: String)
 	toplevel_app_id(app_id: String)
@@ -77,6 +77,13 @@ struct FieldRefIdClone {
 enum SurfaceIdCloneHash {
 	Toplevel,
 	Child { id: u64 },
+}
+
+/// SurfaceDmatexTarget
+enum SurfaceUpdateTargetCloneHash {
+	Toplevel,
+	Child { id: u64 },
+	Cursor,
 }
 
 /// ToplevelState
