@@ -13,8 +13,8 @@ interface PanelItem {
 	pointer_scroll_stop(surface: SurfaceId)
 	key(surface: SurfaceId, keymap: KeymapId, key: u32, pressed: bool)
 	touch_down(surface: SurfaceId, touch_id: u32, position: Vec2)
-	touch_move(surface: SurfaceId, touch_id: u32, position: Vec2)
-	touch_up(surface: SurfaceId, touch_id: u32, position: Vec2)
+	touch_move(touch_id: u32, position: Vec2)
+	touch_up(touch_id: u32)
 
 	close_toplevel()
 
