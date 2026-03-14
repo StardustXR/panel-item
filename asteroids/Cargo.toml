@@ -1,18 +1,19 @@
 [package]
-name = "stardust-xr-panel-item"
+name = "stardust-xr-panel-item-asteroids"
 version = "0.1.0"
 edition = "2024"
 
-[workspace]
-members = ["asteroids"]
-
 [dependencies]
 stardust-xr-fusion = { git = "https://github.com/StardustXR/core" }
+stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids", optional = true }
 tokio = { version = "1.49.0", features = ["sync"] }
 rustc-hash = "2.1.1"
+derive-where = "1.6.0"
 gluon-wire = { git = "https://github.com/technobaboo/gluon" }
 binderbinder = { git = "https://github.com/technobaboo/binderbinder" }
+pion-binder = { git = "https://github.com/technobaboo/pion" }
 mint = "0.5.9"
+directories = "6.0.0"
 
 [build-dependencies]
 syn = "2"
