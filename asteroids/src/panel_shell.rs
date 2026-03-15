@@ -16,7 +16,7 @@ use tokio::sync::{
 };
 use tracing::error;
 
-use stardust_xr_panel_item::{
+use stardust_xr_panel_item::protocol::{
     ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget, UVec2,
 };
 
@@ -195,7 +195,7 @@ enum PanelShellEvent {
     DestroyChild { child_id: u64 },
 }
 
-impl stardust_xr_panel_item::PanelShellHandler for PanelShellHandler {
+impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
     fn update_surface_dmatex(
         &self,
         surface: SurfaceUpdateTarget,

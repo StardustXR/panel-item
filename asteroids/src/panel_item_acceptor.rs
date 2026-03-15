@@ -17,7 +17,10 @@ use stardust_xr_fusion::{
     node::NodeError,
     spatial::{Spatial, SpatialAspect, Transform},
 };
-use stardust_xr_panel_item::{FieldRefId, PanelItem, PanelItemAcceptor, PanelItemAcceptorHandler as _, PanelItemProvider, PanelShell, SpatialRefId};
+use stardust_xr_panel_item::protocol::{
+    FieldRefId, PanelItem, PanelItemAcceptor, PanelItemAcceptorHandler as _, PanelItemProvider,
+    PanelShell, SpatialRefId,
+};
 use tokio::sync::{RwLock, mpsc};
 use tracing::error;
 
@@ -137,11 +140,14 @@ pub struct PanelItemAcceptorHandler {
     rx: Mutex<mpsc::UnboundedReceiver<Arc<BinderObject<PanelShellHandler>>>>,
     drop_notifs: RwLock<Vec<DropNotifier>>,
 }
-impl stardust_xr_panel_item::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
+impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
     async fn accept(
         &self,
         item: PanelItem,
-    ) -> (stardust_xr_panel_item::PanelShell, stardust_xr_panel_item::SpatialRefId) {
+    ) -> (
+        stardust_xr_panel_item::protocol::PanelShell,
+        stardust_xr_panel_item::protocol::SpatialRefId,
+    ) {
         let output_spatial = Spatial::create(&self.field, Transform::none()).unwrap();
         let id = output_spatial.export_spatial().await.unwrap();
 
@@ -154,7 +160,7 @@ impl stardust_xr_panel_item::PanelItemAcceptorHandler for PanelItemAcceptorHandl
         (PanelShell::from_handler(&panel_shell), SpatialRefId { id })
     }
 
-    async fn get_field(&self) -> stardust_xr_panel_item::FieldRefId {
+    async fn get_field(&self) -> stardust_xr_panel_item::protocol::FieldRefId {
         if let Some(id) = self.field_id.get() {
             id.clone()
         } else {

@@ -10,7 +10,7 @@ use stardust_xr_fusion::{
     values::ResourceID,
 };
 
-use stardust_xr_panel_item::SurfaceUpdateTarget;
+use stardust_xr_panel_item::protocol::SurfaceUpdateTarget;
 
 use crate::panel_shell::PanelShellHandler;
 
