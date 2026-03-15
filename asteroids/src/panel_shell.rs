@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use binderbinder::{TransactionHandler, binder_object::BinderObject};
+use binderbinder::{TransactionHandler, binder_object::BinderObject, payload::PayloadBuilder};
 use derive_where::derive_where;
 use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
 use mint::Vector2;
@@ -14,6 +14,7 @@ use tokio::sync::{
     RwLock,
     mpsc::{self, unbounded_channel},
 };
+use tracing::error;
 
 use crate::protocol::{
     ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget, UVec2,
@@ -131,6 +132,7 @@ impl<State: ValidState> Transformable for PanelShell<State> {
     }
 }
 
+#[derive(Debug)]
 pub(super) struct SurfaceUpdate {
     pub(super) dmatex_uid: u64,
     pub(super) acquire_point: u64,
@@ -205,12 +207,13 @@ impl crate::protocol::PanelShellHandler for PanelShellHandler {
         let surface_tx = self.surface_tx.clone();
         tokio::spawn(async move {
             if let Some(tx) = surface_tx.read().await.get(&surface) {
-                _ = tx.send(SurfaceUpdate {
+                tx.send(SurfaceUpdate {
                     dmatex_uid,
                     acquire_point,
                     release_point,
                     opaque,
-                });
+                })
+                .unwrap();
             }
         });
     }
@@ -288,51 +291,77 @@ impl crate::protocol::PanelShellHandler for PanelShellHandler {
     }
 }
 impl TransactionHandler for PanelShellHandler {
-    async fn handle(
-        &self,
-        transaction: binderbinder::device::Transaction,
-    ) -> binderbinder::payload::PayloadBuilder<'_> {
+    async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
         let mut data = GluonDataReader::from_payload(transaction.payload);
         self.dispatch_two_way(transaction.code, &mut data)
             .await
-            .to_payload()
+            .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
+            .map(|v| v.to_payload())
+            .unwrap_or_else(|_| PayloadBuilder::new())
     }
 
     async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
         let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_one_way(transaction.code, &mut data).await
+        _ = self
+            .dispatch_one_way(transaction.code, &mut data)
+            .await
+            .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
     }
 }
 impl<State: ValidState> PanelShell<State> {
-    pub fn on_toplevel_resolution_changed(mut self, func: impl Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync + 'static) -> Self {
+    pub fn on_toplevel_resolution_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync + 'static,
+    ) -> Self {
         self.on_toplevel_resolution_changed = FnWrapper(Box::new(func));
         self
     }
-    pub fn on_toplevel_fullscreen_changed(mut self, func: impl Fn(&mut State, &PanelItem, bool) + Send + Sync + 'static) -> Self {
+    pub fn on_toplevel_fullscreen_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, bool) + Send + Sync + 'static,
+    ) -> Self {
         self.on_toplevel_fullscreen_changed = FnWrapper(Box::new(func));
         self
     }
-    pub fn on_toplevel_title_changed(mut self, func: impl Fn(&mut State, &PanelItem, String) + Send + Sync + 'static) -> Self {
+    pub fn on_toplevel_title_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, String) + Send + Sync + 'static,
+    ) -> Self {
         self.on_toplevel_title_changed = FnWrapper(Box::new(func));
         self
     }
-    pub fn on_toplevel_app_id_changed(mut self, func: impl Fn(&mut State, &PanelItem, String) + Send + Sync + 'static) -> Self {
+    pub fn on_toplevel_app_id_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, String) + Send + Sync + 'static,
+    ) -> Self {
         self.on_toplevel_app_id_changed = FnWrapper(Box::new(func));
         self
     }
-    pub fn cursor_visuals_changed(mut self, func: impl Fn(&mut State, &PanelItem, Option<Geometry>) + Send + Sync + 'static) -> Self {
+    pub fn cursor_visuals_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, Option<Geometry>) + Send + Sync + 'static,
+    ) -> Self {
         self.cursor_visuals_changed = FnWrapper(Box::new(func));
         self
     }
-    pub fn new_child(mut self, func: impl Fn(&mut State, &PanelItem, ChildState) + Send + Sync + 'static) -> Self {
+    pub fn new_child(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, ChildState) + Send + Sync + 'static,
+    ) -> Self {
         self.new_child = FnWrapper(Box::new(func));
         self
     }
-    pub fn child_moved(mut self, func: impl Fn(&mut State, &PanelItem, u64, Geometry) + Send + Sync + 'static) -> Self {
+    pub fn child_moved(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, u64, Geometry) + Send + Sync + 'static,
+    ) -> Self {
         self.child_moved = FnWrapper(Box::new(func));
         self
     }
-    pub fn child_removed(mut self, func: impl Fn(&mut State, &PanelItem, u64) + Send + Sync + 'static) -> Self {
+    pub fn child_removed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, u64) + Send + Sync + 'static,
+    ) -> Self {
         self.child_removed = FnWrapper(Box::new(func));
         self
     }

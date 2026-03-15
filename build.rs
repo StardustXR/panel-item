@@ -16,6 +16,7 @@ fn main() {
         "cargo:rerun-if-changed={}",
         schema_dir.join("*.gluon").display()
     );
+    // return;
 
     // let proto =
     // Use the codegen library directly to regenerate protocol files

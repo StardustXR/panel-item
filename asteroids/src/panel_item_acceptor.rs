@@ -7,6 +7,7 @@ use std::{
 use binderbinder::{
     TransactionHandler,
     binder_object::{BinderObject, ToBinderObjectOrRef},
+    payload::PayloadBuilder,
 };
 use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
 use pion_binder::PionBinderDevice;
@@ -17,6 +18,7 @@ use stardust_xr_fusion::{
     spatial::{Spatial, SpatialAspect, Transform},
 };
 use tokio::sync::{RwLock, mpsc};
+use tracing::error;
 
 use crate::{
     asteroids::panel_shell::PanelShellHandler,
@@ -92,7 +94,7 @@ impl<State: ValidState> CustomElement<State> for PanelItemAcceptorElement<State>
                     .unwrap();
                 let binder_ref = dev.get_binder_ref_from_file(file).await.unwrap();
                 let v = PanelItemProvider::from_object_or_ref(binder_ref);
-                v.register_acceptor(acceptor);
+                v.register_acceptor(acceptor).unwrap();
                 // TODO: figure out how to call drop_acceptor on drop
             }
         });
@@ -173,18 +175,20 @@ impl crate::protocol::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
     }
 }
 impl TransactionHandler for PanelItemAcceptorHandler {
-    async fn handle(
-        &self,
-        transaction: binderbinder::device::Transaction,
-    ) -> binderbinder::payload::PayloadBuilder<'_> {
+    async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
         let mut data = GluonDataReader::from_payload(transaction.payload);
         self.dispatch_two_way(transaction.code, &mut data)
             .await
-            .to_payload()
+            .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
+            .map(|v| v.to_payload())
+            .unwrap_or_else(|_| PayloadBuilder::new())
     }
 
     async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
         let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_one_way(transaction.code, &mut data).await
+        _ = self
+            .dispatch_one_way(transaction.code, &mut data)
+            .await
+            .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
     }
 }

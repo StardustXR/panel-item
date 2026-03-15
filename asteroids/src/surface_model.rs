@@ -1,4 +1,6 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    sync::{Arc, Mutex},
+};
 
 use binderbinder::binder_object::BinderObject;
 use stardust_xr_asteroids::{CustomElement, Transformable, ValidState};
@@ -79,7 +81,8 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                         .expect("invalid surface target")
                         .clone();
                     loop {
-                        if let Some(msg) = recv.write().await.recv().await {
+                        let mut recv = recv.write().await;
+                        if let Some(msg) = recv.recv().await {
                             let part = part.lock().unwrap();
                             _ = part.set_material_parameter(
                                 "opaque",

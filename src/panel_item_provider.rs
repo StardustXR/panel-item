@@ -1,10 +1,11 @@
 use std::{fmt::Debug, sync::Arc};
 
-use binderbinder::TransactionHandler;
+use binderbinder::{TransactionHandler, payload::PayloadBuilder};
 use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
 use rustc_hash::FxHashMap;
 use stardust_xr_fusion::{ClientHandle, fields::FieldRef};
 use tokio::sync::{RwLock, watch};
+use tracing::error;
 
 use crate::protocol::{PanelItemAcceptor, PanelItemProviderHandler as _};
 
@@ -42,7 +43,7 @@ impl crate::protocol::PanelItemProviderHandler for PanelItemProviderHandler {
         let tx = self.tx.clone();
         let client = self.client.clone();
         tokio::spawn(async move {
-            let field_id = acceptor.get_field().await;
+            let field_id = acceptor.get_field().await.unwrap();
             let Ok(field) = FieldRef::import(&client, field_id.id).await else {
                 return;
             };
@@ -55,7 +56,7 @@ impl crate::protocol::PanelItemProviderHandler for PanelItemProviderHandler {
     fn drop_acceptor(&self, acceptor: PanelItemAcceptor) {
         let tx = self.tx.clone();
         tokio::spawn(async move {
-            let field_id = acceptor.get_field().await;
+            let field_id = acceptor.get_field().await.unwrap();
             tx.send_modify(|v| {
                 v.remove(&field_id.id);
             });
@@ -67,18 +68,20 @@ impl crate::protocol::PanelItemProviderHandler for PanelItemProviderHandler {
     }
 }
 impl TransactionHandler for PanelItemProviderHandler {
-    async fn handle(
-        &self,
-        transaction: binderbinder::device::Transaction,
-    ) -> binderbinder::payload::PayloadBuilder<'_> {
+    async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
         let mut data = GluonDataReader::from_payload(transaction.payload);
         self.dispatch_two_way(transaction.code, &mut data)
             .await
-            .to_payload()
+            .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
+            .map(|v| v.to_payload())
+            .unwrap_or_else(|_| PayloadBuilder::new())
     }
 
     async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
         let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_one_way(transaction.code, &mut data).await
+        _ = self
+            .dispatch_one_way(transaction.code, &mut data)
+            .await
+            .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
     }
 }
