@@ -7,7 +7,7 @@ use stardust_xr_fusion::{
     drawable::{self, DmatexSubmitInfo, MaterialParameter, Model, ModelPart, ModelPartAspect},
     node::{NodeError, NodeResult, NodeType},
     spatial::{Spatial, SpatialRef, Transform},
-    values::ResourceID,
+    values::{ResourceID, color::rgba_linear},
 };
 
 use stardust_xr_panel_item::protocol::SurfaceUpdateTarget;
@@ -89,6 +89,10 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                                 MaterialParameter::Bool(msg.opaque),
                             );
                             _ = part.set_material_parameter("unlit", MaterialParameter::Bool(true));
+                            _ = part.set_material_parameter(
+                                "color",
+                                MaterialParameter::Color(rgba_linear!(1.0, 1.0, 1.0, 1.0)),
+                            );
                             let dmatex_id = part.client().generate_id();
                             _ = drawable::import_dmatex_uid(
                                 part.client(),
