@@ -1,6 +1,4 @@
-use std::{
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use binderbinder::binder_object::BinderObject;
 use stardust_xr_asteroids::{CustomElement, Transformable, ValidState};
@@ -12,7 +10,9 @@ use stardust_xr_fusion::{
     values::ResourceID,
 };
 
-use crate::{asteroids::panel_shell::PanelShellHandler, protocol::SurfaceUpdateTarget};
+use stardust_xr_panel_item::SurfaceUpdateTarget;
+
+use crate::panel_shell::PanelShellHandler;
 
 #[derive(Debug)]
 pub struct SurfaceModel {

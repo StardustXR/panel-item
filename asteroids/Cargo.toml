@@ -5,7 +5,8 @@ edition = "2024"
 
 [dependencies]
 stardust-xr-fusion = { git = "https://github.com/StardustXR/core" }
-stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids", optional = true }
+stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids" }
+stardust-xr-panel-item.path = ".."
 tokio = { version = "1.49.0", features = ["sync"] }
 rustc-hash = "2.1.1"
 derive-where = "1.6.0"
@@ -14,6 +15,7 @@ binderbinder = { git = "https://github.com/technobaboo/binderbinder" }
 pion-binder = { git = "https://github.com/technobaboo/pion" }
 mint = "0.5.9"
 directories = "6.0.0"
+tracing = "0.1.44"
 
 [build-dependencies]
 syn = "2"
