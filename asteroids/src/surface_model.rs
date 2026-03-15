@@ -132,8 +132,8 @@ pub struct SurfaceModelInner {
 }
 impl SurfaceModelInner {
     fn new(parent: &SpatialRef, info: &SurfaceModel) -> NodeResult<Self> {
-        let root = Spatial::create(parent, Transform::identity())?;
-        let model = Model::create(&root, info.transform, &info.model_resource)?;
+        let root = Spatial::create(parent, info.transform)?;
+        let model = Model::create(&root, Transform::identity(), &info.model_resource)?;
         let part = model.part(&info.part_path)?;
         Ok(SurfaceModelInner {
             root,

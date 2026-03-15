@@ -1,4 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
+};
 
 use binderbinder::{TransactionHandler, binder_object::BinderObject, payload::PayloadBuilder};
 use derive_where::derive_where;
@@ -10,9 +13,12 @@ use stardust_xr_fusion::{
     node::NodeError,
     spatial::{Spatial, SpatialAspect, SpatialRef, Transform},
 };
-use tokio::sync::{
-    RwLock,
-    mpsc::{self, unbounded_channel},
+use tokio::{
+    sync::{
+        RwLock,
+        mpsc::{self, unbounded_channel},
+    },
+    task::JoinHandle,
 };
 use tracing::error;
 
@@ -33,10 +39,14 @@ pub struct PanelShell<State: ValidState> {
     new_child: FnWrapper<dyn Fn(&mut State, &PanelItem, ChildState) + Send + Sync>,
     child_moved: FnWrapper<dyn Fn(&mut State, &PanelItem, u64, Geometry) + Send + Sync>,
     child_removed: FnWrapper<dyn Fn(&mut State, &PanelItem, u64) + Send + Sync>,
+    item_disconnected: FnWrapper<dyn Fn(&mut State) + Send + Sync>,
     transform: Transform,
 }
 impl<State: ValidState> PanelShell<State> {
-    pub fn new(handler: &Arc<BinderObject<PanelShellHandler>>) -> Self {
+    pub fn new(
+        handler: &Arc<BinderObject<PanelShellHandler>>,
+        item_disconnected: impl Fn(&mut State) + Send + Sync + 'static,
+    ) -> Self {
         Self {
             handler: handler.clone(),
             on_toplevel_resolution_changed: FnWrapper(Box::new(|_, _, _| {})),
@@ -47,6 +57,7 @@ impl<State: ValidState> PanelShell<State> {
             new_child: FnWrapper(Box::new(|_, _, _| {})),
             child_moved: FnWrapper(Box::new(|_, _, _, _| {})),
             child_removed: FnWrapper(Box::new(|_, _, _| {})),
+            item_disconnected: FnWrapper(Box::new(item_disconnected)),
             transform: Transform::identity(),
         }
     }
@@ -84,6 +95,12 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
         state: &mut State,
         _inner: &mut Self::Inner,
     ) {
+        if self.handler.death_task.is_finished()
+            && !self.handler.death_handled.load(Ordering::Relaxed)
+        {
+            self.item_disconnected.0(state);
+            self.handler.death_handled.store(true, Ordering::Relaxed);
+        }
         while let Ok(event) = self.handler.rx.lock().unwrap().try_recv() {
             match event {
                 PanelShellEvent::ToplevelFullscreen { fullscreen_active } => {
@@ -151,6 +168,8 @@ pub struct PanelShellHandler {
     item_output_spatial: Spatial,
     item: PanelItem,
     drop_notifs: RwLock<Vec<DropNotifier>>,
+    death_task: JoinHandle<()>,
+    death_handled: AtomicBool,
 }
 impl PanelShellHandler {
     pub fn new(item: PanelItem, item_output_spatial: Spatial) -> Self {
@@ -169,6 +188,8 @@ impl PanelShellHandler {
             Arc::new(RwLock::new(cursor_rx)),
         );
         let (tx, rx) = mpsc::unbounded_channel();
+        let death_future = item.death_or_drop();
+        let death_task = tokio::spawn(death_future);
         Self {
             tx,
             rx: Mutex::new(rx),
@@ -177,10 +198,18 @@ impl PanelShellHandler {
             drop_notifs: RwLock::default(),
             surface_rx: Arc::new(surface_rx.into()),
             surface_tx: Arc::new(surface_tx.into()),
+            death_task,
+            death_handled: AtomicBool::new(false),
         }
     }
     pub fn item(&self) -> &PanelItem {
         &self.item
+    }
+}
+
+impl Drop for PanelShellHandler {
+    fn drop(&mut self) {
+        self.death_task.abort();
     }
 }
 
