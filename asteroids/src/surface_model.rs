@@ -107,6 +107,7 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                                     release_point: msg.release_point,
                                 }),
                             );
+                            _ = drawable::unregister_dmatex(part.client(), dmatex_id);
                         }
                     }
                 }
