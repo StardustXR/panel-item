@@ -66,6 +66,14 @@ impl crate::protocol::PanelItemProviderHandler for PanelItemProviderHandler {
     async fn drop_notification_requested(&self, notifier: gluon_wire::drop_tracking::DropNotifier) {
         self.drop_notifs.write().await.push(notifier);
     }
+
+    async fn startup_token_spatial_ref(
+        &self,
+        _ctx: gluon_wire::GluonCtx,
+        _token: String,
+        _spatial_ref: crate::protocol::SpatialRefId,
+    ) {
+    }
 }
 impl TransactionHandler for PanelItemProviderHandler {
     async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {

@@ -48,6 +48,7 @@ interface PanelItemAcceptor {
 interface PanelItemProvider {
 	register_acceptor(acceptor: Ref<PanelItemAcceptor>)
 	drop_acceptor(acceptor: Ref<PanelItemAcceptor>)
+	startup_token_spatial_ref(token: String, spatial_ref: SpatialRefId) -> ()
 }
 
 /// KeymapId
