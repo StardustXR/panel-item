@@ -9,7 +9,7 @@ use binderbinder::{
     binder_object::{BinderObject, ToBinderObjectOrRef},
     payload::PayloadBuilder,
 };
-use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
+use gluon_wire::{GluonCtx, GluonDataReader, drop_tracking::DropNotifier};
 use pion_binder::PionBinderDevice;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
@@ -143,6 +143,7 @@ pub struct PanelItemAcceptorHandler {
 impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
     async fn accept(
         &self,
+        _ctx: GluonCtx,
         item: PanelItem,
     ) -> (
         stardust_xr_panel_item::protocol::PanelShell,
@@ -160,7 +161,7 @@ impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcc
         (PanelShell::from_handler(&panel_shell), SpatialRefId { id })
     }
 
-    async fn get_field(&self) -> stardust_xr_panel_item::protocol::FieldRefId {
+    async fn get_field(&self, _ctx: GluonCtx) -> stardust_xr_panel_item::protocol::FieldRefId {
         if let Some(id) = self.field_id.get() {
             id.clone()
         } else {
@@ -178,17 +179,31 @@ impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcc
 impl TransactionHandler for PanelItemAcceptorHandler {
     async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
         let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_two_way(transaction.code, &mut data)
-            .await
-            .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
-            .map(|v| v.to_payload())
-            .unwrap_or_else(|_| PayloadBuilder::new())
+        self.dispatch_two_way(
+            transaction.code,
+            &mut data,
+            GluonCtx {
+                sender_pid: transaction.sender_pid,
+                sender_euid: transaction.sender_euid,
+            },
+        )
+        .await
+        .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
+        .map(|v| v.to_payload())
+        .unwrap_or_else(|_| PayloadBuilder::new())
     }
 
     async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
         let mut data = GluonDataReader::from_payload(transaction.payload);
         _ = self
-            .dispatch_one_way(transaction.code, &mut data)
+            .dispatch_one_way(
+                transaction.code,
+                &mut data,
+                GluonCtx {
+                    sender_pid: transaction.sender_pid,
+                    sender_euid: transaction.sender_euid,
+                },
+            )
             .await
             .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
     }

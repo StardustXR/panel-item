@@ -5,7 +5,7 @@ use std::sync::{
 
 use binderbinder::{TransactionHandler, binder_object::BinderObject, payload::PayloadBuilder};
 use derive_where::derive_where;
-use gluon_wire::{GluonDataReader, drop_tracking::DropNotifier};
+use gluon_wire::{GluonCtx, GluonDataReader, drop_tracking::DropNotifier};
 use mint::Vector2;
 use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
@@ -227,6 +227,7 @@ enum PanelShellEvent {
 impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
     fn update_surface_dmatex(
         &self,
+        _ctx: GluonCtx,
         surface: SurfaceUpdateTarget,
         dmatex_uid: u64,
         acquire_point: u64,
@@ -247,7 +248,7 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
         });
     }
 
-    fn toplevel_resized(&self, new_size: UVec2) {
+    fn toplevel_resized(&self, _ctx: GluonCtx, new_size: UVec2) {
         self.tx
             .send(PanelShellEvent::ToplevelResized {
                 new_size: new_size.into(),
@@ -255,31 +256,31 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
             .unwrap();
     }
 
-    fn toplevel_fullscreen(&self, fullscreen_active: bool) {
+    fn toplevel_fullscreen(&self, _ctx: GluonCtx, fullscreen_active: bool) {
         self.tx
             .send(PanelShellEvent::ToplevelFullscreen { fullscreen_active })
             .unwrap();
     }
 
-    fn toplevel_title(&self, title: String) {
+    fn toplevel_title(&self, _ctx: GluonCtx, title: String) {
         self.tx
             .send(PanelShellEvent::ToplevelTitle { title })
             .unwrap();
     }
 
-    fn toplevel_app_id(&self, app_id: String) {
+    fn toplevel_app_id(&self, _ctx: GluonCtx, app_id: String) {
         self.tx
             .send(PanelShellEvent::ToplevelAppId { app_id })
             .unwrap();
     }
 
-    fn set_cursor_visuals(&self, geometry: Option<Geometry>) {
+    fn set_cursor_visuals(&self, _ctx: GluonCtx, geometry: Option<Geometry>) {
         self.tx
             .send(PanelShellEvent::SetCursorVisuals { geometry })
             .unwrap();
     }
 
-    fn create_child(&self, child: ChildState) {
+    fn create_child(&self, _ctx: GluonCtx, child: ChildState) {
         let surface_target = SurfaceUpdateTarget::Child { id: child.id };
         self.tx
             .send(PanelShellEvent::CreateChild { child })
@@ -296,13 +297,13 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
         });
     }
 
-    fn move_child(&self, child_id: u64, geometry: Geometry) {
+    fn move_child(&self, _ctx: GluonCtx, child_id: u64, geometry: Geometry) {
         self.tx
             .send(PanelShellEvent::MoveChild { child_id, geometry })
             .unwrap();
     }
 
-    fn destroy_child(&self, child_id: u64) {
+    fn destroy_child(&self, _ctx: GluonCtx, child_id: u64) {
         self.tx
             .send(PanelShellEvent::DestroyChild { child_id })
             .unwrap();
@@ -322,17 +323,31 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
 impl TransactionHandler for PanelShellHandler {
     async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
         let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_two_way(transaction.code, &mut data)
-            .await
-            .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
-            .map(|v| v.to_payload())
-            .unwrap_or_else(|_| PayloadBuilder::new())
+        self.dispatch_two_way(
+            transaction.code,
+            &mut data,
+            GluonCtx {
+                sender_pid: transaction.sender_pid,
+                sender_euid: transaction.sender_euid,
+            },
+        )
+        .await
+        .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
+        .map(|v| v.to_payload())
+        .unwrap_or_else(|_| PayloadBuilder::new())
     }
 
     async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
         let mut data = GluonDataReader::from_payload(transaction.payload);
         _ = self
-            .dispatch_one_way(transaction.code, &mut data)
+            .dispatch_one_way(
+                transaction.code,
+                &mut data,
+                GluonCtx {
+                    sender_pid: transaction.sender_pid,
+                    sender_euid: transaction.sender_euid,
+                },
+            )
             .await
             .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
     }
