@@ -1,11 +1,11 @@
 use std::sync::{
-    Arc, Mutex,
+    Arc, Mutex, OnceLock,
     atomic::{AtomicBool, Ordering},
 };
 
-use binderbinder::{TransactionHandler, binder_object::BinderObject, payload::PayloadBuilder};
+use binderbinder::{BinderDevice, binder_object::BinderObject};
 use derive_where::derive_where;
-use gluon_wire::{GluonCtx, GluonDataReader, drop_tracking::DropNotifier};
+use gluon_wire::{GluonCtx, impl_transaction_handler};
 use mint::Vector2;
 use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
@@ -20,7 +20,6 @@ use tokio::{
     },
     task::JoinHandle,
 };
-use tracing::error;
 
 use stardust_xr_panel_item::protocol::{
     ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget, UVec2,
@@ -95,7 +94,11 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
         state: &mut State,
         _inner: &mut Self::Inner,
     ) {
-        if self.handler.death_task.is_finished()
+        if self
+            .handler
+            .death_task
+            .get()
+            .is_some_and(|v| v.is_finished())
             && !self.handler.death_handled.load(Ordering::Relaxed)
         {
             self.item_disconnected.0(state);
@@ -167,12 +170,15 @@ pub struct PanelShellHandler {
     rx: Mutex<mpsc::UnboundedReceiver<PanelShellEvent>>,
     item_output_spatial: Spatial,
     item: PanelItem,
-    drop_notifs: RwLock<Vec<DropNotifier>>,
-    death_task: JoinHandle<()>,
+    death_task: OnceLock<JoinHandle<()>>,
     death_handled: AtomicBool,
 }
 impl PanelShellHandler {
-    pub fn new(item: PanelItem, item_output_spatial: Spatial) -> Self {
+    pub fn new(
+        device: &Arc<BinderDevice>,
+        item: PanelItem,
+        item_output_spatial: Spatial,
+    ) -> BinderObject<Self> {
         let (toplevel_tx, toplevel_rx) = mpsc::unbounded_channel();
         let (cursor_tx, cursor_rx) = mpsc::unbounded_channel();
         let mut surface_tx = FxHashMap::default();
@@ -188,19 +194,20 @@ impl PanelShellHandler {
             Arc::new(RwLock::new(cursor_rx)),
         );
         let (tx, rx) = mpsc::unbounded_channel();
-        let death_future = item.death_or_drop();
-        let death_task = tokio::spawn(death_future);
-        Self {
+        let v = device.register_object(Self {
             tx,
             rx: Mutex::new(rx),
             item_output_spatial,
             item,
-            drop_notifs: RwLock::default(),
             surface_rx: Arc::new(surface_rx.into()),
             surface_tx: Arc::new(surface_tx.into()),
-            death_task,
+            death_task: OnceLock::new(),
             death_handled: AtomicBool::new(false),
-        }
+        });
+        let death_future = v.strong_refs_hit_zero();
+        let death_task = tokio::spawn(death_future);
+        _ = v.death_task.set(death_task);
+        v
     }
     pub fn item(&self) -> &PanelItem {
         &self.item
@@ -209,7 +216,9 @@ impl PanelShellHandler {
 
 impl Drop for PanelShellHandler {
     fn drop(&mut self) {
-        self.death_task.abort();
+        if let Some(t) = self.death_task.get() {
+            t.abort()
+        }
     }
 }
 
@@ -225,7 +234,7 @@ enum PanelShellEvent {
 }
 
 impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
-    fn update_surface_dmatex(
+    async fn update_surface_dmatex(
         &self,
         _ctx: GluonCtx,
         surface: SurfaceUpdateTarget,
@@ -248,7 +257,7 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
         });
     }
 
-    fn toplevel_resized(&self, _ctx: GluonCtx, new_size: UVec2) {
+    async fn toplevel_resized(&self, _ctx: GluonCtx, new_size: UVec2) {
         self.tx
             .send(PanelShellEvent::ToplevelResized {
                 new_size: new_size.into(),
@@ -256,31 +265,31 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
             .unwrap();
     }
 
-    fn toplevel_fullscreen(&self, _ctx: GluonCtx, fullscreen_active: bool) {
+    async fn toplevel_fullscreen(&self, _ctx: GluonCtx, fullscreen_active: bool) {
         self.tx
             .send(PanelShellEvent::ToplevelFullscreen { fullscreen_active })
             .unwrap();
     }
 
-    fn toplevel_title(&self, _ctx: GluonCtx, title: String) {
+    async fn toplevel_title(&self, _ctx: GluonCtx, title: String) {
         self.tx
             .send(PanelShellEvent::ToplevelTitle { title })
             .unwrap();
     }
 
-    fn toplevel_app_id(&self, _ctx: GluonCtx, app_id: String) {
+    async fn toplevel_app_id(&self, _ctx: GluonCtx, app_id: String) {
         self.tx
             .send(PanelShellEvent::ToplevelAppId { app_id })
             .unwrap();
     }
 
-    fn set_cursor_visuals(&self, _ctx: GluonCtx, geometry: Option<Geometry>) {
+    async fn set_cursor_visuals(&self, _ctx: GluonCtx, geometry: Option<Geometry>) {
         self.tx
             .send(PanelShellEvent::SetCursorVisuals { geometry })
             .unwrap();
     }
 
-    fn create_child(&self, _ctx: GluonCtx, child: ChildState) {
+    async fn create_child(&self, _ctx: GluonCtx, child: ChildState) {
         let surface_target = SurfaceUpdateTarget::Child { id: child.id };
         self.tx
             .send(PanelShellEvent::CreateChild { child })
@@ -297,13 +306,13 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
         });
     }
 
-    fn move_child(&self, _ctx: GluonCtx, child_id: u64, geometry: Geometry) {
+    async fn move_child(&self, _ctx: GluonCtx, child_id: u64, geometry: Geometry) {
         self.tx
             .send(PanelShellEvent::MoveChild { child_id, geometry })
             .unwrap();
     }
 
-    fn destroy_child(&self, _ctx: GluonCtx, child_id: u64) {
+    async fn destroy_child(&self, _ctx: GluonCtx, child_id: u64) {
         self.tx
             .send(PanelShellEvent::DestroyChild { child_id })
             .unwrap();
@@ -315,43 +324,8 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
             surface_rx.write().await.remove(&surface_target);
         });
     }
-
-    async fn drop_notification_requested(&self, notifier: gluon_wire::drop_tracking::DropNotifier) {
-        self.drop_notifs.write().await.push(notifier);
-    }
 }
-impl TransactionHandler for PanelShellHandler {
-    async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
-        let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_two_way(
-            transaction.code,
-            &mut data,
-            GluonCtx {
-                sender_pid: transaction.sender_pid,
-                sender_euid: transaction.sender_euid,
-            },
-        )
-        .await
-        .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
-        .map(|v| v.to_payload())
-        .unwrap_or_else(|_| PayloadBuilder::new())
-    }
-
-    async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
-        let mut data = GluonDataReader::from_payload(transaction.payload);
-        _ = self
-            .dispatch_one_way(
-                transaction.code,
-                &mut data,
-                GluonCtx {
-                    sender_pid: transaction.sender_pid,
-                    sender_euid: transaction.sender_euid,
-                },
-            )
-            .await
-            .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
-    }
-}
+impl_transaction_handler!(PanelShellHandler);
 impl<State: ValidState> PanelShell<State> {
     pub fn on_toplevel_resolution_changed(
         mut self,

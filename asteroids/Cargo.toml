@@ -8,17 +8,11 @@ stardust-xr-fusion = { git = "https://github.com/StardustXR/core" }
 stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids" }
 stardust-xr-panel-item.path = ".."
 tokio = { version = "1.49.0", features = ["sync"] }
-rustc-hash = "2.1.1"
 derive-where = "1.6.0"
-gluon-wire = { git = "https://github.com/technobaboo/gluon" }
-binderbinder = { git = "https://github.com/technobaboo/binderbinder" }
+gluon-wire.workspace = true
+binderbinder.workspace = true
 pion-binder = { git = "https://github.com/technobaboo/pion" }
-mint = "0.5.9"
 directories = "6.0.0"
-tracing = "0.1.44"
-
-[build-dependencies]
-syn = "2"
-prettyplease = "0.2"
-gluon-parser = { git = "https://github.com/technobaboo/gluon" }
-gluon-codegen-rust = { git = "https://github.com/technobaboo/gluon" }
+mint.workspace = true
+tracing.workspace = true
+rustc-hash = "2.1.2"

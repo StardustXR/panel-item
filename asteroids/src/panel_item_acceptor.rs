@@ -1,15 +1,11 @@
 use std::{
     env,
     fs::OpenOptions,
-    sync::{Arc, Mutex, OnceLock},
+    sync::{Mutex, OnceLock},
 };
 
-use binderbinder::{
-    TransactionHandler,
-    binder_object::{BinderObject, ToBinderObjectOrRef},
-    payload::PayloadBuilder,
-};
-use gluon_wire::{GluonCtx, GluonDataReader, drop_tracking::DropNotifier};
+use binderbinder::binder_object::{BinderObject, ToBinderObjectOrRef};
+use gluon_wire::{GluonCtx, impl_transaction_handler};
 use pion_binder::PionBinderDevice;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
@@ -21,8 +17,7 @@ use stardust_xr_panel_item::protocol::{
     FieldRefId, PanelItem, PanelItemAcceptor, PanelItemAcceptorHandler as _, PanelItemProvider,
     PanelShell, SpatialRefId,
 };
-use tokio::sync::{RwLock, mpsc};
-use tracing::error;
+use tokio::sync::mpsc;
 
 use crate::panel_shell::PanelShellHandler;
 
@@ -31,14 +26,13 @@ pub struct PanelItemAcceptorElement<State: ValidState> {
     binder_dev: PionBinderDevice,
     transform: Transform,
     shape: Shape,
-    on_create_item:
-        FnWrapper<dyn Fn(&mut State, Arc<BinderObject<PanelShellHandler>>) + Send + Sync>,
+    on_create_item: FnWrapper<dyn Fn(&mut State, BinderObject<PanelShellHandler>) + Send + Sync>,
 }
 impl<State: ValidState> PanelItemAcceptorElement<State> {
     pub fn new(
         binder_dev: &PionBinderDevice,
         shape: Shape,
-        on_accept: impl Fn(&mut State, Arc<BinderObject<PanelShellHandler>>) + Send + Sync + 'static,
+        on_accept: impl Fn(&mut State, BinderObject<PanelShellHandler>) + Send + Sync + 'static,
     ) -> Self {
         Self {
             binder_dev: binder_dev.clone(),
@@ -50,7 +44,7 @@ impl<State: ValidState> PanelItemAcceptorElement<State> {
 }
 
 impl<State: ValidState> CustomElement<State> for PanelItemAcceptorElement<State> {
-    type Inner = Arc<BinderObject<PanelItemAcceptorHandler>>;
+    type Inner = BinderObject<PanelItemAcceptorHandler>;
 
     type Resource = ();
 
@@ -73,7 +67,6 @@ impl<State: ValidState> CustomElement<State> for PanelItemAcceptorElement<State>
             field_id: OnceLock::new(),
             tx,
             rx: Mutex::new(rx),
-            drop_notifs: RwLock::default(),
         });
         tokio::spawn({
             let dev = self.binder_dev.clone();
@@ -136,9 +129,8 @@ impl<State: ValidState> Transformable for PanelItemAcceptorElement<State> {
 pub struct PanelItemAcceptorHandler {
     field: Field,
     field_id: OnceLock<FieldRefId>,
-    tx: mpsc::UnboundedSender<Arc<BinderObject<PanelShellHandler>>>,
-    rx: Mutex<mpsc::UnboundedReceiver<Arc<BinderObject<PanelShellHandler>>>>,
-    drop_notifs: RwLock<Vec<DropNotifier>>,
+    tx: mpsc::UnboundedSender<BinderObject<PanelShellHandler>>,
+    rx: Mutex<mpsc::UnboundedReceiver<BinderObject<PanelShellHandler>>>,
 }
 impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
     async fn accept(
@@ -152,13 +144,14 @@ impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcc
         let output_spatial = Spatial::create(&self.field, Transform::none()).unwrap();
         let id = output_spatial.export_spatial().await.unwrap();
 
-        let handler = PanelShellHandler::new(item.clone(), output_spatial);
-        let panel_shell = item
-            .to_binder_object_or_ref()
-            .device()
-            .register_object(handler);
-        self.tx.send(panel_shell.clone()).unwrap();
-        (PanelShell::from_handler(&panel_shell), SpatialRefId { id })
+        let panel_shell = PanelShellHandler::new(
+            item.to_binder_object_or_ref().device(),
+            item.clone(),
+            output_spatial,
+        );
+        let proxy = PanelShell::from_handler(&panel_shell);
+        self.tx.send(panel_shell).unwrap();
+        (proxy, SpatialRefId { id })
     }
 
     async fn get_field(&self, _ctx: GluonCtx) -> stardust_xr_panel_item::protocol::FieldRefId {
@@ -171,40 +164,5 @@ impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcc
             id
         }
     }
-
-    async fn drop_notification_requested(&self, notifier: gluon_wire::drop_tracking::DropNotifier) {
-        self.drop_notifs.write().await.push(notifier);
-    }
 }
-impl TransactionHandler for PanelItemAcceptorHandler {
-    async fn handle(&self, transaction: binderbinder::device::Transaction) -> PayloadBuilder<'_> {
-        let mut data = GluonDataReader::from_payload(transaction.payload);
-        self.dispatch_two_way(
-            transaction.code,
-            &mut data,
-            GluonCtx {
-                sender_pid: transaction.sender_pid,
-                sender_euid: transaction.sender_euid,
-            },
-        )
-        .await
-        .inspect_err(|err| error!("failed to dispatch two way transaction: {err}"))
-        .map(|v| v.to_payload())
-        .unwrap_or_else(|_| PayloadBuilder::new())
-    }
-
-    async fn handle_one_way(&self, transaction: binderbinder::device::Transaction) {
-        let mut data = GluonDataReader::from_payload(transaction.payload);
-        _ = self
-            .dispatch_one_way(
-                transaction.code,
-                &mut data,
-                GluonCtx {
-                    sender_pid: transaction.sender_pid,
-                    sender_euid: transaction.sender_euid,
-                },
-            )
-            .await
-            .inspect_err(|err| error!("failed to dispatch one way transaction: {err}"));
-    }
-}
+impl_transaction_handler!(PanelItemAcceptorHandler);

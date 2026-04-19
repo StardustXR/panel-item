@@ -50,6 +50,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ansi_term"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d52a9bb7ec0cf484c551830a7ce27bd20d67eac647e1befb56b0be4ee39a55d2"
+dependencies = [
+ "winapi",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -248,9 +257,8 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "binderbinder"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/binderbinder#6c469c6dac04fc38dcae07dbef11a6f9b1495638"
+source = "git+https://github.com/technobaboo/binderbinder#e107496da155e20fd0397d46d6c3ae4fd84f7b5d"
 dependencies = [
- "async-trait",
  "bitflags 2.11.0",
  "byteorder",
  "dashmap",
@@ -639,7 +647,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -693,7 +701,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -968,30 +976,32 @@ dependencies = [
 [[package]]
 name = "gluon-codegen-rust"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#d4ee6d48ab398e1db139861b44d89cca24a03a21"
 dependencies = [
  "convert_case 0.11.0",
  "gluon-parser",
+ "gluon-wire",
  "prettyplease",
  "proc-macro2",
  "quote",
+ "syn 2.0.117",
 ]
 
 [[package]]
 name = "gluon-parser"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#d4ee6d48ab398e1db139861b44d89cca24a03a21"
 dependencies = [
+ "ansi_term",
  "binderbinder",
  "chumsky",
+ "convert_case 0.11.0",
 ]
 
 [[package]]
 name = "gluon-wire"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#d4ee6d48ab398e1db139861b44d89cca24a03a21"
 dependencies = [
  "binderbinder",
+ "bitflags 2.11.0",
  "rustix",
  "thiserror 2.0.18",
  "tokio",
@@ -1493,7 +1503,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1954,9 +1964,9 @@ checksum = "b50b8869d9fc858ce7266cce0194bd74df58b9d0e3f6df3a9fc8eb470d95c09d"
 
 [[package]]
 name = "rustc-hash"
-version = "2.1.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
+checksum = "94300abf3f1ae2e2b8ffb7b58043de3d399c73fa6f4b73826402a5c457614dbe"
 
 [[package]]
 name = "rustc_version"
@@ -1977,7 +1987,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -2246,7 +2256,6 @@ dependencies = [
  "gluon-wire",
  "mint",
  "prettyplease",
- "rustc-hash",
  "stardust-xr-fusion",
  "syn 2.0.117",
  "tokio",
@@ -2260,17 +2269,13 @@ dependencies = [
  "binderbinder",
  "derive-where",
  "directories",
- "gluon-codegen-rust",
- "gluon-parser",
  "gluon-wire",
  "mint",
  "pion-binder",
- "prettyplease",
  "rustc-hash",
  "stardust-xr-asteroids",
  "stardust-xr-fusion",
  "stardust-xr-panel-item",
- "syn 2.0.117",
  "tokio",
  "tracing",
 ]
@@ -2389,7 +2394,7 @@ dependencies = [
  "getrandom 0.4.2",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

@@ -52,12 +52,12 @@ interface PanelItemProvider {
 }
 
 /// KeymapId
-struct KeymapIdCloneHash {
+struct KeymapId {
 	id: u64,
 }
 
 /// ScrollSource
-enum ScrollSourceCloneHash {
+enum ScrollSource {
 	Wheel,
 	Touch,
 	Continuous,
@@ -65,30 +65,30 @@ enum ScrollSourceCloneHash {
 }
 
 /// SpatialRef
-struct SpatialRefIdClone {
+struct SpatialRefId {
 	id: u64,
 }
 
 /// FieldRef
-struct FieldRefIdClone {
+struct FieldRefId {
 	id: u64,
 }
 
 /// SurfaceId
-enum SurfaceIdCloneHash {
+enum SurfaceId {
 	Toplevel,
 	Child { id: u64 },
 }
 
 /// SurfaceDmatexTarget
-enum SurfaceUpdateTargetCloneHash {
+enum SurfaceUpdateTarget {
 	Toplevel,
 	Child { id: u64 },
 	Cursor,
 }
 
 /// ToplevelState
-struct ToplevelStateClone {
+struct ToplevelState {
 	parent: Option<u64>,
 	title: Option<String>,
 	app_id: Option<String>,
@@ -98,7 +98,7 @@ struct ToplevelStateClone {
 }
 
 /// ChildState
-struct ChildStateClone {
+struct ChildState {
 	id: u64,
 	parent: SurfaceId,
 	geometry: Geometry,
@@ -107,35 +107,35 @@ struct ChildStateClone {
 }
 
 /// PanelItemInitData
-struct PanelItemInitDataClone {
+struct PanelItemInitData {
 	cursor: Option<Geometry>,
 	toplevel: ToplevelState,
 	children: Vec<ChildState>,
 }
 
 /// Rect
-struct RectClone {
+struct Rect {
 	origin: Vec2,
 	size: Vec2,
 }
 
 /// Geometry
-struct GeometryCloneHash {
+struct Geometry {
 	origin: IVec2,
 	size: UVec2,
 }
 /// Vec2
-struct Vec2Clone {
+struct Vec2 {
 	x: f32,
 	y: f32,
 }
 /// UVec2
-struct UVec2CloneHash {
+struct UVec2 {
 	x: u32,
 	y: u32,
 }
-/// iVec2
-struct iVec2CloneHash {
+/// IVec2
+struct IVec2 {
 	x: i32,
 	y: i32,
 }
