@@ -976,6 +976,7 @@ dependencies = [
 [[package]]
 name = "gluon-codegen-rust"
 version = "0.1.0"
+source = "git+https://github.com/technobaboo/gluon#ba138e7a1a5a9944f01fff20e6d473f9e698400b"
 dependencies = [
  "convert_case 0.11.0",
  "gluon-parser",
@@ -989,6 +990,7 @@ dependencies = [
 [[package]]
 name = "gluon-parser"
 version = "0.1.0"
+source = "git+https://github.com/technobaboo/gluon#ba138e7a1a5a9944f01fff20e6d473f9e698400b"
 dependencies = [
  "ansi_term",
  "binderbinder",
@@ -999,6 +1001,7 @@ dependencies = [
 [[package]]
 name = "gluon-wire"
 version = "0.1.0"
+source = "git+https://github.com/technobaboo/gluon#ba138e7a1a5a9944f01fff20e6d473f9e698400b"
 dependencies = [
  "binderbinder",
  "bitflags 2.11.0",

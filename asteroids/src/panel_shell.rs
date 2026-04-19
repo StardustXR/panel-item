@@ -27,7 +27,7 @@ use stardust_xr_panel_item::protocol::{
 
 #[derive_where(Debug)]
 pub struct PanelShell<State: ValidState> {
-    handler: Arc<BinderObject<PanelShellHandler>>,
+    handler: Arc<PanelShellHandler>,
     on_toplevel_resolution_changed:
         FnWrapper<dyn Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync>,
     on_toplevel_fullscreen_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, bool) + Send + Sync>,
@@ -43,11 +43,11 @@ pub struct PanelShell<State: ValidState> {
 }
 impl<State: ValidState> PanelShell<State> {
     pub fn new(
-        handler: &Arc<BinderObject<PanelShellHandler>>,
+        handler: &BinderObject<PanelShellHandler>,
         item_disconnected: impl Fn(&mut State) + Send + Sync + 'static,
     ) -> Self {
         Self {
-            handler: handler.clone(),
+            handler: handler.handler_arc().clone(),
             on_toplevel_resolution_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_fullscreen_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_title_changed: FnWrapper(Box::new(|_, _, _| {})),

@@ -19,19 +19,19 @@ pub struct SurfaceModel {
     transform: Transform,
     surface: SurfaceUpdateTarget,
     model_resource: ResourceID,
-    shell: Arc<BinderObject<PanelShellHandler>>,
+    shell: Arc<PanelShellHandler>,
     part_path: String,
 }
 impl SurfaceModel {
     pub fn new(
-        shell: &Arc<BinderObject<PanelShellHandler>>,
+        shell: &BinderObject<PanelShellHandler>,
         surface: impl Into<SurfaceUpdateTarget>,
         resource: ResourceID,
         surface_part_path: &str,
     ) -> Self {
         Self {
             transform: Transform::none(),
-            shell: shell.clone(),
+            shell: shell.handler_arc().clone(),
             part_path: surface_part_path.to_string(),
             model_resource: resource,
             surface: surface.into(),
