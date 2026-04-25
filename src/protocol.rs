@@ -830,7 +830,7 @@ impl PanelItem {
         Ok(())
     }
     pub fn from_handler<H: PanelItemHandler>(
-        obj: &binderbinder::binder_object::BinderObject<H>,
+        obj: &impl binderbinder::binder_object::OwnedBinderObjectRefTrait<H>,
     ) -> PanelItem {
         PanelItem::from_object_or_ref(
             binderbinder::binder_object::ToBinderObjectOrRef::to_binder_object_or_ref(
@@ -1209,7 +1209,7 @@ impl PanelShell {
         Ok(())
     }
     pub fn from_handler<H: PanelShellHandler>(
-        obj: &binderbinder::binder_object::BinderObject<H>,
+        obj: &impl binderbinder::binder_object::OwnedBinderObjectRefTrait<H>,
     ) -> PanelShell {
         PanelShell::from_object_or_ref(
             binderbinder::binder_object::ToBinderObjectOrRef::to_binder_object_or_ref(
@@ -1426,7 +1426,7 @@ impl PanelItemAcceptor {
         Ok(gluon_wire::GluonConvertable::read(&mut reader)?)
     }
     pub fn from_handler<H: PanelItemAcceptorHandler>(
-        obj: &binderbinder::binder_object::BinderObject<H>,
+        obj: &impl binderbinder::binder_object::OwnedBinderObjectRefTrait<H>,
     ) -> PanelItemAcceptor {
         PanelItemAcceptor::from_object_or_ref(
             binderbinder::binder_object::ToBinderObjectOrRef::to_binder_object_or_ref(
@@ -1564,7 +1564,7 @@ impl PanelItemProvider {
         Ok(())
     }
     pub fn from_handler<H: PanelItemProviderHandler>(
-        obj: &binderbinder::binder_object::BinderObject<H>,
+        obj: &impl binderbinder::binder_object::OwnedBinderObjectRefTrait<H>,
     ) -> PanelItemProvider {
         PanelItemProvider::from_object_or_ref(
             binderbinder::binder_object::ToBinderObjectOrRef::to_binder_object_or_ref(
