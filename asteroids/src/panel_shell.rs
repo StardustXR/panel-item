@@ -30,6 +30,10 @@ pub struct PanelShell<State: ValidState> {
     handler: Arc<PanelShellHandler>,
     on_toplevel_resolution_changed:
         FnWrapper<dyn Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync>,
+    on_toplevel_max_size_changed:
+        FnWrapper<dyn Fn(&mut State, &PanelItem, Option<Vector2<u32>>) + Send + Sync>,
+    on_toplevel_min_size_changed:
+        FnWrapper<dyn Fn(&mut State, &PanelItem, Option<Vector2<u32>>) + Send + Sync>,
     on_toplevel_fullscreen_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, bool) + Send + Sync>,
     on_toplevel_title_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, String) + Send + Sync>,
     on_toplevel_app_id_changed: FnWrapper<dyn Fn(&mut State, &PanelItem, String) + Send + Sync>,
@@ -49,6 +53,8 @@ impl<State: ValidState> PanelShell<State> {
         Self {
             handler: handler.handler_arc().clone(),
             on_toplevel_resolution_changed: FnWrapper(Box::new(|_, _, _| {})),
+            on_toplevel_max_size_changed: FnWrapper(Box::new(|_, _, _| {})),
+            on_toplevel_min_size_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_fullscreen_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_title_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_app_id_changed: FnWrapper(Box::new(|_, _, _| {})),
@@ -133,6 +139,12 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
                 }
                 PanelShellEvent::ToplevelResized { new_size } => {
                     self.on_toplevel_resolution_changed.0(state, &self.handler.item, new_size)
+                }
+                PanelShellEvent::ToplevelMaxSize { max_size } => {
+                    self.on_toplevel_max_size_changed.0(state, &self.handler.item, max_size)
+                }
+                PanelShellEvent::ToplevelMinSize { min_size } => {
+                    self.on_toplevel_min_size_changed.0(state, &self.handler.item, min_size)
                 }
             }
         }
@@ -224,6 +236,8 @@ impl Drop for PanelShellHandler {
 
 enum PanelShellEvent {
     ToplevelResized { new_size: Vector2<u32> },
+    ToplevelMaxSize { max_size: Option<Vector2<u32>> },
+    ToplevelMinSize { min_size: Option<Vector2<u32>> },
     ToplevelFullscreen { fullscreen_active: bool },
     ToplevelTitle { title: String },
     ToplevelAppId { app_id: String },
@@ -261,6 +275,22 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
         self.tx
             .send(PanelShellEvent::ToplevelResized {
                 new_size: new_size.into(),
+            })
+            .unwrap();
+    }
+
+    async fn toplevel_max_size(&self, _ctx: gluon_wire::GluonCtx, max_size: Option<UVec2>) {
+        self.tx
+            .send(PanelShellEvent::ToplevelMaxSize {
+                max_size: max_size.map(Into::into),
+            })
+            .unwrap();
+    }
+
+    async fn toplevel_min_size(&self, _ctx: gluon_wire::GluonCtx, min_size: Option<UVec2>) {
+        self.tx
+            .send(PanelShellEvent::ToplevelMinSize {
+                min_size: min_size.map(Into::into),
             })
             .unwrap();
     }
@@ -332,6 +362,20 @@ impl<State: ValidState> PanelShell<State> {
         func: impl Fn(&mut State, &PanelItem, Vector2<u32>) + Send + Sync + 'static,
     ) -> Self {
         self.on_toplevel_resolution_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn on_toplevel_max_size_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, Option<Vector2<u32>>) + Send + Sync + 'static,
+    ) -> Self {
+        self.on_toplevel_max_size_changed = FnWrapper(Box::new(func));
+        self
+    }
+    pub fn on_toplevel_min_size_changed(
+        mut self,
+        func: impl Fn(&mut State, &PanelItem, Option<Vector2<u32>>) + Send + Sync + 'static,
+    ) -> Self {
+        self.on_toplevel_min_size_changed = FnWrapper(Box::new(func));
         self
     }
     pub fn on_toplevel_fullscreen_changed(

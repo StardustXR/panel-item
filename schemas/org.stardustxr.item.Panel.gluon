@@ -29,6 +29,8 @@ interface PanelShell {
 	update_surface_dmatex(surface: SurfaceUpdateTarget, dmatex_uid: u64, acquire_point: u64, release_point: u64, opaque: bool)
 
 	toplevel_resized(new_size: UVec2)
+	toplevel_max_size(max_size: Option<UVec2>)
+	toplevel_min_size(min_size: Option<UVec2>)
 	toplevel_fullscreen(fullscreen_active: bool)
 	toplevel_title(title: String)
 	toplevel_app_id(app_id: String)

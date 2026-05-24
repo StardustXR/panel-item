@@ -1129,6 +1129,28 @@ impl PanelShell {
         self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
         Ok(())
     }
+    pub fn toplevel_max_size(
+        &self,
+        max_size: Option<UVec2>,
+    ) -> Result<(), gluon_wire::GluonSendError> {
+        let mut gluon_builder = gluon_wire::GluonDataBuilder::new();
+        max_size.write(&mut gluon_builder)?;
+        self.obj
+            .device()
+            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
+        Ok(())
+    }
+    pub fn toplevel_min_size(
+        &self,
+        min_size: Option<UVec2>,
+    ) -> Result<(), gluon_wire::GluonSendError> {
+        let mut gluon_builder = gluon_wire::GluonDataBuilder::new();
+        min_size.write(&mut gluon_builder)?;
+        self.obj
+            .device()
+            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
+        Ok(())
+    }
     pub fn toplevel_fullscreen(
         &self,
         fullscreen_active: bool,
@@ -1137,7 +1159,7 @@ impl PanelShell {
         fullscreen_active.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn toplevel_title(
@@ -1148,7 +1170,7 @@ impl PanelShell {
         title.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn toplevel_app_id(
@@ -1159,7 +1181,7 @@ impl PanelShell {
         app_id.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn set_cursor_visuals(
@@ -1170,7 +1192,7 @@ impl PanelShell {
         geometry.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn create_child(
@@ -1181,7 +1203,7 @@ impl PanelShell {
         child.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn move_child(
@@ -1194,7 +1216,7 @@ impl PanelShell {
         geometry.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn destroy_child(
@@ -1205,7 +1227,7 @@ impl PanelShell {
         child_id.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn from_handler<H: PanelShellHandler>(
@@ -1254,6 +1276,16 @@ pub trait PanelShellHandler: binderbinder::device::TransactionHandler + Send + S
         &self,
         _ctx: gluon_wire::GluonCtx,
         new_size: UVec2,
+    ) -> impl Future<Output = ()> + Send + Sync;
+    fn toplevel_max_size(
+        &self,
+        _ctx: gluon_wire::GluonCtx,
+        max_size: Option<UVec2>,
+    ) -> impl Future<Output = ()> + Send + Sync;
+    fn toplevel_min_size(
+        &self,
+        _ctx: gluon_wire::GluonCtx,
+        min_size: Option<UVec2>,
     ) -> impl Future<Output = ()> + Send + Sync;
     fn toplevel_fullscreen(
         &self,
@@ -1318,41 +1350,55 @@ pub trait PanelShellHandler: binderbinder::device::TransactionHandler + Send + S
                         .await;
                 }
                 10u32 => {
-                    self.toplevel_fullscreen(
+                    self.toplevel_max_size(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
                         )
                         .await;
                 }
                 11u32 => {
-                    self.toplevel_title(
+                    self.toplevel_min_size(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
                         )
                         .await;
                 }
                 12u32 => {
-                    self.toplevel_app_id(
+                    self.toplevel_fullscreen(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
                         )
                         .await;
                 }
                 13u32 => {
-                    self.set_cursor_visuals(
+                    self.toplevel_title(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
                         )
                         .await;
                 }
                 14u32 => {
-                    self.create_child(
+                    self.toplevel_app_id(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
                         )
                         .await;
                 }
                 15u32 => {
+                    self.set_cursor_visuals(
+                            ctx,
+                            gluon_wire::GluonConvertable::read(gluon_data)?,
+                        )
+                        .await;
+                }
+                16u32 => {
+                    self.create_child(
+                            ctx,
+                            gluon_wire::GluonConvertable::read(gluon_data)?,
+                        )
+                        .await;
+                }
+                17u32 => {
                     self.move_child(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
@@ -1360,7 +1406,7 @@ pub trait PanelShellHandler: binderbinder::device::TransactionHandler + Send + S
                         )
                         .await;
                 }
-                16u32 => {
+                18u32 => {
                     self.destroy_child(
                             ctx,
                             gluon_wire::GluonConvertable::read(gluon_data)?,
