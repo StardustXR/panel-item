@@ -8,14 +8,14 @@ members = ["asteroids"]
 
 [workspace.dependencies]
 binderbinder = { git = "https://github.com/technobaboo/binderbinder" }
-gluon-wire = { git = "https://github.com/technobaboo/gluon" }
+gluon = { git = "https://github.com/technobaboo/gluon" }
 mint = "0.5.9"
 tracing = "0.1.44"
 
 [dependencies]
 stardust-xr-fusion = { git = "https://github.com/StardustXR/core" }
 tokio = { version = "1.49.0", features = ["sync"] }
-gluon-wire.workspace = true
+gluon.workspace = true
 binderbinder.workspace = true
 mint.workspace = true
 tracing.workspace = true
@@ -24,4 +24,4 @@ tracing.workspace = true
 syn = "2"
 prettyplease = "0.2"
 gluon-parser = { git = "https://github.com/technobaboo/gluon" }
-gluon-codegen-rust = { git = "https://github.com/technobaboo/gluon" }
+gluon-codegen = { git = "https://github.com/technobaboo/gluon" }

@@ -9,7 +9,7 @@ stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids" }
 stardust-xr-panel-item.path = ".."
 tokio = { version = "1.49.0", features = ["sync"] }
 derive-where = "1.6.0"
-gluon-wire.workspace = true
+gluon.workspace = true
 binderbinder.workspace = true
 pion-binder = { git = "https://github.com/technobaboo/pion" }
 directories = "6.0.0"

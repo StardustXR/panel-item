@@ -5,7 +5,7 @@ use std::{
 };
 
 use binderbinder::binder_object::{BinderObject, ToBinderObjectOrRef};
-use gluon_wire::{GluonCtx, impl_transaction_handler};
+use gluon::Handler;
 use pion_binder::PionBinderDevice;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
@@ -125,7 +125,7 @@ impl<State: ValidState> Transformable for PanelItemAcceptorElement<State> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Handler)]
 pub struct PanelItemAcceptorHandler {
     field: Field,
     field_id: OnceLock<FieldRefId>,
@@ -135,7 +135,7 @@ pub struct PanelItemAcceptorHandler {
 impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
     async fn accept(
         &self,
-        _ctx: GluonCtx,
+        _ctx: gluon::Context,
         item: PanelItem,
     ) -> (
         stardust_xr_panel_item::protocol::PanelShell,
@@ -154,7 +154,10 @@ impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcc
         (proxy, SpatialRefId { id })
     }
 
-    async fn get_field(&self, _ctx: GluonCtx) -> stardust_xr_panel_item::protocol::FieldRefId {
+    async fn get_field(
+        &self,
+        _ctx: gluon::Context,
+    ) -> stardust_xr_panel_item::protocol::FieldRefId {
         if let Some(id) = self.field_id.get() {
             id.clone()
         } else {
@@ -165,4 +168,3 @@ impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcc
         }
     }
 }
-impl_transaction_handler!(PanelItemAcceptorHandler);
