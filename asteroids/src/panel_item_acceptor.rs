@@ -1,100 +1,92 @@
-use std::{
-    env,
-    fs::OpenOptions,
-    sync::{Mutex, OnceLock},
-};
+use std::sync::Mutex;
 
 use binderbinder::binder_object::{BinderObject, ToBinderObjectOrRef};
 use gluon::Handler;
-use pion_binder::PionBinderDevice;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
-    fields::{Field, FieldAspect as _, Shape},
-    node::NodeError,
-    spatial::{Spatial, SpatialAspect, Transform},
+    Error,
+    fields::{Field, FieldExt as _, Shape},
+    query::{QueryExt, QueryableInterfaceGuard, QueryableObject},
+    spatial::{CreatedSpatial, Spatial, SpatialExt, SpatialInterface, SpatialRef, Transform},
 };
-use stardust_xr_panel_item::protocol::{
-    FieldRefId, PanelItem, PanelItemAcceptor, PanelItemAcceptorHandler as _, PanelItemProvider,
-    PanelShell, SpatialRefId,
+use stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler as _;
+use stardust_xr_panel_item::{
+    panel_item::{PanelItem, PanelShell},
+    panel_item_acceptor,
 };
 use tokio::sync::mpsc;
 
 use crate::panel_shell::PanelShellHandler;
 
 #[derive_where::derive_where(Debug)]
-pub struct PanelItemAcceptorElement<State: ValidState> {
-    binder_dev: PionBinderDevice,
+pub struct PanelItemAcceptor<State: ValidState> {
     transform: Transform,
     shape: Shape,
     on_create_item: FnWrapper<dyn Fn(&mut State, BinderObject<PanelShellHandler>) + Send + Sync>,
 }
-impl<State: ValidState> PanelItemAcceptorElement<State> {
+impl<State: ValidState> PanelItemAcceptor<State> {
     pub fn new(
-        binder_dev: &PionBinderDevice,
         shape: Shape,
         on_accept: impl Fn(&mut State, BinderObject<PanelShellHandler>) + Send + Sync + 'static,
     ) -> Self {
         Self {
-            binder_dev: binder_dev.clone(),
-            transform: Transform::none(),
+            transform: Transform::IDENTITY,
             shape,
             on_create_item: FnWrapper(Box::new(on_accept)),
         }
     }
 }
 
-impl<State: ValidState> CustomElement<State> for PanelItemAcceptorElement<State> {
-    type Inner = BinderObject<PanelItemAcceptorHandler>;
+pub struct PanelItemAcceptorInner {
+    handler: BinderObject<PanelItemAcceptorHandler>,
+    _queryable: QueryableObject,
+    _interface_guard: QueryableInterfaceGuard,
+    spatial: Spatial,
+    field: Field,
+}
 
-    type Resource = ();
+impl<State: ValidState> CustomElement<State> for PanelItemAcceptor<State> {
+    type Inner = PanelItemAcceptorInner;
 
-    type Error = NodeError;
+    type Error = Error;
 
-    fn create_inner(
+    async fn create_inner(
         &self,
-        _ctx: &stardust_xr_asteroids::Context,
+        ctx: &stardust_xr_asteroids::Context,
         info: stardust_xr_asteroids::CreateInnerInfo,
-        _resource: &mut Self::Resource,
     ) -> Result<Self::Inner, Self::Error> {
-        let field = Field::create(
-            info.parent_space,
-            self.transform.clone(),
-            self.shape.clone(),
-        )?;
+        let client = &ctx.stardust_client;
+        let (spatial, spatial_ref) =
+            Spatial::create(client, &info.parent_space, self.transform).await?;
+        let (field, _) = Field::create(client, &spatial, self.shape.clone()).await?;
         let (tx, rx) = mpsc::unbounded_channel();
-        let handler = self.binder_dev.register_object(PanelItemAcceptorHandler {
-            field,
-            field_id: OnceLock::new(),
-            tx,
-            rx: Mutex::new(rx),
-        });
-        tokio::spawn({
-            let dev = self.binder_dev.clone();
-            let acceptor = PanelItemAcceptor::from_handler(&handler);
-            async move {
-                let file = OpenOptions::new()
-                    .read(true)
-                    .write(true)
-                    .open(
-                        directories::BaseDirs::new()
-                            .unwrap()
-                            .runtime_dir()
-                            .unwrap()
-                            .join(format!("{}.lock", env::var("WAYLAND_DISPLAY").unwrap())),
-                    )
-                    .unwrap();
-                let binder_ref = dev.get_binder_ref_from_file(file).await.unwrap();
-                let v = PanelItemProvider::from_object_or_ref(binder_ref);
-                v.register_acceptor(acceptor).unwrap();
-                // TODO: figure out how to call drop_acceptor on drop
-            }
-        });
+        let handler = client
+            .pion_device()
+            .register_object(PanelItemAcceptorHandler {
+                tx,
+                rx: Mutex::new(rx),
+                spatial_ref,
+                spatial_interface: ctx.stardust_client.spatial_interface().clone(),
+            });
+        let _queryable = QueryableObject::create(client, spatial.clone(), field.clone()).await?;
+        let _interface_guard = _queryable
+            .add_interface(
+                &handler,
+                panel_item_acceptor::EXTERNAL_PROTOCOL.protocol_name,
+            )
+            .await?;
 
-        Ok(handler)
+        Ok(PanelItemAcceptorInner {
+            handler,
+            _queryable,
+            _interface_guard,
+            spatial,
+            field,
+        })
     }
 
-    fn diff(&self, old: &Self, inner: &mut Self::Inner, _resource: &mut Self::Resource) {
-        self.apply_transform(old, &inner.field);
+    fn diff(&self, old: &Self, _context: &stardust_xr_asteroids::Context, inner: &mut Self::Inner) {
+        self.apply_transform(old, &inner.spatial);
         if self.shape != old.shape {
             let _ = inner.field.set_shape(self.shape.clone());
         }
@@ -102,20 +94,16 @@ impl<State: ValidState> CustomElement<State> for PanelItemAcceptorElement<State>
     fn frame(
         &self,
         _context: &stardust_xr_asteroids::Context,
-        _info: &stardust_xr_fusion::root::FrameInfo,
+        _info: &stardust_xr_fusion::client::FrameInfo,
         state: &mut State,
         inner: &mut Self::Inner,
     ) {
-        while let Ok(shell) = inner.rx.lock().unwrap().try_recv() {
+        while let Ok(shell) = inner.handler.rx.lock().unwrap().try_recv() {
             self.on_create_item.0(state, shell)
         }
     }
-
-    fn spatial_aspect(&self, inner: &Self::Inner) -> stardust_xr_fusion::spatial::SpatialRef {
-        inner.field.clone().as_spatial_ref()
-    }
 }
-impl<State: ValidState> Transformable for PanelItemAcceptorElement<State> {
+impl<State: ValidState> Transformable for PanelItemAcceptor<State> {
     fn transform(&self) -> &Transform {
         &self.transform
     }
@@ -127,44 +115,36 @@ impl<State: ValidState> Transformable for PanelItemAcceptorElement<State> {
 
 #[derive(Debug, Handler)]
 pub struct PanelItemAcceptorHandler {
-    field: Field,
-    field_id: OnceLock<FieldRefId>,
+    spatial_ref: SpatialRef,
+    spatial_interface: SpatialInterface,
     tx: mpsc::UnboundedSender<BinderObject<PanelShellHandler>>,
     rx: Mutex<mpsc::UnboundedReceiver<BinderObject<PanelShellHandler>>>,
 }
-impl stardust_xr_panel_item::protocol::PanelItemAcceptorHandler for PanelItemAcceptorHandler {
+impl stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler
+    for PanelItemAcceptorHandler
+{
     async fn accept(
         &self,
         _ctx: gluon::Context,
         item: PanelItem,
-    ) -> (
-        stardust_xr_panel_item::protocol::PanelShell,
-        stardust_xr_panel_item::protocol::SpatialRefId,
-    ) {
-        let output_spatial = Spatial::create(&self.field, Transform::none()).unwrap();
-        let id = output_spatial.export_spatial().await.unwrap();
+    ) -> (stardust_xr_panel_item::panel_item::PanelShell, SpatialRef) {
+        let CreatedSpatial {
+            spatial,
+            spatial_ref,
+        } = self
+            .spatial_interface
+            .create_spatial(self.spatial_ref.clone(), Transform::IDENTITY)
+            .await
+            .unwrap()
+            .unwrap();
 
         let panel_shell = PanelShellHandler::new(
             item.to_binder_object_or_ref().device(),
             item.clone(),
-            output_spatial,
+            spatial,
         );
         let proxy = PanelShell::from_handler(&panel_shell);
         self.tx.send(panel_shell).unwrap();
-        (proxy, SpatialRefId { id })
-    }
-
-    async fn get_field(
-        &self,
-        _ctx: gluon::Context,
-    ) -> stardust_xr_panel_item::protocol::FieldRefId {
-        if let Some(id) = self.field_id.get() {
-            id.clone()
-        } else {
-            let id = self.field.export_field().await.unwrap();
-            let id = FieldRefId { id };
-            _ = self.field_id.set(id.clone());
-            id
-        }
+        (proxy, spatial_ref)
     }
 }

@@ -1,0 +1,7 @@
+import "org.stardustxr.item.Panel" as panel_item
+import "org.stardustxr.Spatial" as spatial
+
+/// PanelItemAcceptor
+interface PanelItemAcceptor {
+	accept(item: Ref<panel_item::PanelItem>) -> (shell: Ref<panel_item::PanelShell>, output_spatial: Ref<spatial::SpatialRef>)
+}

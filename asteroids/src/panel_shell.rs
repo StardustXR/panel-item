@@ -10,8 +10,7 @@ use mint::Vector2;
 use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
-    node::NodeError,
-    spatial::{Spatial, SpatialAspect, SpatialRef, Transform},
+    Error, dmatex::{DmatexRef, DmatexSubmitRelease}, spatial::{Spatial, SpatialRef, Transform}, types::Size2
 };
 use tokio::{
     sync::{
@@ -21,8 +20,8 @@ use tokio::{
     task::JoinHandle,
 };
 
-use stardust_xr_panel_item::protocol::{
-    ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget, UVec2,
+use stardust_xr_panel_item::panel_item::{
+    ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget,
 };
 
 #[derive_where(Debug)]
@@ -63,7 +62,7 @@ impl<State: ValidState> PanelShell<State> {
             child_moved: FnWrapper(Box::new(|_, _, _, _| {})),
             child_removed: FnWrapper(Box::new(|_, _, _| {})),
             item_disconnected: FnWrapper(Box::new(item_disconnected)),
-            transform: Transform::identity(),
+            transform: Transform::IDENTITY,
         }
     }
 }
@@ -71,22 +70,24 @@ impl<State: ValidState> PanelShell<State> {
 impl<State: ValidState> CustomElement<State> for PanelShell<State> {
     type Inner = SpatialRef;
 
-    type Resource = ();
+    type Error = Error;
 
-    type Error = NodeError;
-
-    fn create_inner(
+    async fn create_inner(
         &self,
         _asteroids_context: &stardust_xr_asteroids::Context,
         info: stardust_xr_asteroids::CreateInnerInfo,
-        _resource: &mut Self::Resource,
     ) -> Result<Self::Inner, Self::Error> {
-        Ok(info.parent_space.clone())
+        Ok(info.parent_space)
     }
 
-    fn diff(&self, _old_self: &Self, inner: &mut Self::Inner, _resource: &mut Self::Resource) {
+    fn diff(
+        &self,
+        _old_self: &Self,
+        _context: &stardust_xr_asteroids::Context,
+        inner: &mut Self::Inner,
+    ) {
         // can't properly diff this since we don't know if this is the same spatial as last diff
-        _ = self.handler.item_output_spatial.set_spatial_parent(inner);
+        _ = self.handler.item_output_spatial.set_parent(inner.clone());
         _ = self
             .handler
             .item_output_spatial
@@ -96,7 +97,7 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
     fn frame(
         &self,
         _context: &stardust_xr_asteroids::Context,
-        _info: &stardust_xr_fusion::root::FrameInfo,
+        _info: &stardust_xr_fusion::client::FrameInfo,
         state: &mut State,
         _inner: &mut Self::Inner,
     ) {
@@ -149,10 +150,6 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
             }
         }
     }
-
-    fn spatial_aspect(&self, inner: &Self::Inner) -> stardust_xr_fusion::spatial::SpatialRef {
-        inner.clone()
-    }
 }
 impl<State: ValidState> Transformable for PanelShell<State> {
     fn transform(&self) -> &Transform {
@@ -166,9 +163,9 @@ impl<State: ValidState> Transformable for PanelShell<State> {
 
 #[derive(Debug)]
 pub(super) struct SurfaceUpdate {
-    pub(super) dmatex_uid: u64,
+    pub(super) dmatex: DmatexRef,
     pub(super) acquire_point: u64,
-    pub(super) release_point: u64,
+    pub(super) release_point: DmatexSubmitRelease,
     pub(super) opaque: bool,
 }
 
@@ -247,21 +244,21 @@ enum PanelShellEvent {
     DestroyChild { child_id: u64 },
 }
 
-impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
+impl stardust_xr_panel_item::panel_item::PanelShellHandler for PanelShellHandler {
     async fn update_surface_dmatex(
         &self,
         _ctx: gluon::Context,
         surface: SurfaceUpdateTarget,
-        dmatex_uid: u64,
+        dmatex: DmatexRef,
         acquire_point: u64,
-        release_point: u64,
+        release_point: DmatexSubmitRelease,
         opaque: bool,
     ) {
         let surface_tx = self.surface_tx.clone();
         tokio::spawn(async move {
             if let Some(tx) = surface_tx.read().await.get(&surface) {
                 tx.send(SurfaceUpdate {
-                    dmatex_uid,
+                    dmatex,
                     acquire_point,
                     release_point,
                     opaque,
@@ -271,7 +268,7 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
         });
     }
 
-    async fn toplevel_resized(&self, _ctx: gluon::Context, new_size: UVec2) {
+    async fn toplevel_resized(&self, _ctx: gluon::Context, new_size: Size2) {
         self.tx
             .send(PanelShellEvent::ToplevelResized {
                 new_size: new_size.into(),
@@ -279,7 +276,7 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
             .unwrap();
     }
 
-    async fn toplevel_max_size(&self, _ctx: gluon::Context, max_size: Option<UVec2>) {
+    async fn toplevel_max_size(&self, _ctx: gluon::Context, max_size: Option<Size2>) {
         self.tx
             .send(PanelShellEvent::ToplevelMaxSize {
                 max_size: max_size.map(Into::into),
@@ -287,7 +284,7 @@ impl stardust_xr_panel_item::protocol::PanelShellHandler for PanelShellHandler {
             .unwrap();
     }
 
-    async fn toplevel_min_size(&self, _ctx: gluon::Context, min_size: Option<UVec2>) {
+    async fn toplevel_min_size(&self, _ctx: gluon::Context, min_size: Option<Size2>) {
         self.tx
             .send(PanelShellEvent::ToplevelMinSize {
                 min_size: min_size.map(Into::into),

@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-stardust-xr-fusion = { git = "https://github.com/StardustXR/core" }
-stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids" }
+stardust-xr-fusion = { git = "https://github.com/StardustXR/core", branch = "binder" }
+stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids", branch = "binder" }
 stardust-xr-panel-item.path = ".."
 tokio = { version = "1.49.0", features = ["sync"] }
 derive-where = "1.6.0"

@@ -13,15 +13,21 @@ mint = "0.5.9"
 tracing = "0.1.44"
 
 [dependencies]
-stardust-xr-fusion = { git = "https://github.com/StardustXR/core" }
+stardust-xr-fusion = { git = "https://github.com/StardustXR/core", branch = "binder" }
+stardust-xr-protocol = { git = "https://github.com/StardustXR/core", branch = "binder" }
 tokio = { version = "1.49.0", features = ["sync"] }
 gluon.workspace = true
 binderbinder.workspace = true
 mint.workspace = true
 tracing.workspace = true
+serde = { version = "1.0.228", features = ["derive"], optional = true }
 
 [build-dependencies]
+stardust-xr-protocol = { git = "https://github.com/StardustXR/core", branch = "binder" }
 syn = "2"
 prettyplease = "0.2"
 gluon-parser = { git = "https://github.com/technobaboo/gluon" }
 gluon-codegen = { git = "https://github.com/technobaboo/gluon" }
+
+[features]
+serde = ["dep:serde", "stardust-xr-protocol/serde"]

@@ -1,35 +1,38 @@
+import "org.stardustxr.Types" as types
+import "org.stardustxr.Keymap" as keymap
+import "org.stardustxr.Dmatex" as dmatex
+
 /// PanelItem
 interface PanelItem {
-	register_xkb_keymap(xkb_keymap: String) -> (id: KeymapId)
-
-	pointer_motion(surface: SurfaceId, delta: Option<Vec2>, position: Vec2)
+	pointer_motion(surface: SurfaceId, delta: Option<types::Vec2f>, position: types::Vec2f, timestamp: Option<types::Timestamp>)
 	// uses event ids from `input_event_codes.h`
-	pointer_button(surface: SurfaceId, button: u32, pressed: bool)
+	pointer_button(surface: SurfaceId, button: u32, pressed: bool, timestamp: Option<types::Timestamp>)
 	// TODO: expose stop timestamp?
-	pointer_scroll_pixels(surface: SurfaceId, delta: Vec2, source: ScrollSource)
-	pointer_scroll_discrete(surface: SurfaceId, delta: Vec2, source: ScrollSource)
+	pointer_scroll_pixels(surface: SurfaceId, delta: types::Vec2f, source: ScrollSource, timestamp: Option<types::Timestamp>)
+	pointer_scroll_discrete(surface: SurfaceId, delta: types::Vec2f, source: ScrollSource, timestamp: Option<types::Timestamp>)
 	// TODO: expose stop timestamp?
-	pointer_scroll_stop(surface: SurfaceId)
-	key(surface: SurfaceId, keymap: KeymapId, key: u32, pressed: bool)
-	touch_down(surface: SurfaceId, touch_id: u32, position: Vec2)
-	touch_move(touch_id: u32, position: Vec2)
-	touch_up(touch_id: u32)
+	pointer_scroll_stop(surface: SurfaceId, timestamp: Option<types::Timestamp>)
+	key(surface: SurfaceId, key: u32, pressed: bool, modifier_state: ModifierState, keymap: Ref<keymap::Keymap>, timestamp: Option<types::Timestamp>)
+	touch_down(surface: SurfaceId, touch_id: u32, position: types::Vec2f, timestamp: Option<types::Timestamp>)
+	touch_move(touch_id: u32, position: types::Vec2f, timestamp: Option<types::Timestamp>)
+	touch_up(touch_id: u32, timestamp: Option<types::Timestamp>)
 
 	close_toplevel()
 
 	resize_toplevel_to_app_request()
-	request_toplevel_resize(new_size: UVec2)
+	request_toplevel_resize(new_size: types::Size2)
 	// if the toplevel should be treated as "focused", this defaults to true on panelItem connect
 	toplevel_focused(focused: bool)
 	
 }
+
 /// PanelShell
 interface PanelShell {
-	update_surface_dmatex(surface: SurfaceUpdateTarget, dmatex_uid: u64, acquire_point: u64, release_point: u64, opaque: bool)
+	update_surface_dmatex(surface: SurfaceUpdateTarget, dmatex: Ref<dmatex::DmatexRef>, acquire_point: u64, release_point: Ref<dmatex::DmatexSubmitRelease>, opaque: bool)
 
-	toplevel_resized(new_size: UVec2)
-	toplevel_max_size(max_size: Option<UVec2>)
-	toplevel_min_size(min_size: Option<UVec2>)
+	toplevel_resized(new_size: types::Size2)
+	toplevel_max_size(max_size: Option<types::Size2>)
+	toplevel_min_size(min_size: Option<types::Size2>)
 	toplevel_fullscreen(fullscreen_active: bool)
 	toplevel_title(title: String)
 	toplevel_app_id(app_id: String)
@@ -39,22 +42,12 @@ interface PanelShell {
 	move_child(child_id: u64, geometry: Geometry)
 	destroy_child(child_id: u64)
 }
-/// PanelItemAcceptor
-interface PanelItemAcceptor {
-	accept(item: Ref<PanelItem>) -> (shell: Ref<PanelShell>, output_spatial: SpatialRefId)
-	// TODO: maybe remove with the SpatialQueryService?
-	get_field() -> (field: FieldRefId)
-}
-/// Temporary until the SpatialQueryService is implemented
-interface PanelItemProvider {
-	register_acceptor(acceptor: Ref<PanelItemAcceptor>)
-	drop_acceptor(acceptor: Ref<PanelItemAcceptor>)
-	startup_token_spatial_ref(token: String, spatial_ref: SpatialRefId) -> ()
-}
 
-/// KeymapId
-struct KeymapId {
-	id: u64,
+/// Modifier state driven by xkbcommon
+struct ModifierState {
+	depressed: u32,
+	latched: u32,
+	locked: u32,
 }
 
 /// ScrollSource
@@ -63,16 +56,6 @@ enum ScrollSource {
 	Touch,
 	Continuous,
 	WheelTilt,
-}
-
-/// SpatialRef
-struct SpatialRefId {
-	id: u64,
-}
-
-/// FieldRef
-struct FieldRefId {
-	id: u64,
 }
 
 /// SurfaceId
@@ -93,9 +76,9 @@ struct ToplevelState {
 	parent: Option<u64>,
 	title: Option<String>,
 	app_id: Option<String>,
-	size: UVec2,
-	min_size: Option<UVec2>,
-	max_size: Option<UVec2>,
+	size: types::Size2,
+	min_size: Option<types::Size2>,
+	max_size: Option<types::Size2>,
 }
 
 /// ChildState
@@ -116,27 +99,12 @@ struct PanelItemInitData {
 
 /// Rect
 struct Rect {
-	origin: Vec2,
-	size: Vec2,
+	origin: types::Vec2f,
+	size: types::Vec2f,
 }
 
 /// Geometry
 struct Geometry {
-	origin: IVec2,
-	size: UVec2,
-}
-/// Vec2
-struct Vec2 {
-	x: f32,
-	y: f32,
-}
-/// UVec2
-struct UVec2 {
-	x: u32,
-	y: u32,
-}
-/// IVec2
-struct IVec2 {
-	x: i32,
-	y: i32,
+	origin: types::Vec2i,
+	size: types::Size2,
 }

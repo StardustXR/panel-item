@@ -1,16 +1,20 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use binderbinder::binder_object::BinderObject;
 use stardust_xr_asteroids::{CustomElement, Transformable, ValidState};
 use stardust_xr_fusion::{
-    AbortOnDrop,
-    drawable::{self, DmatexSubmitInfo, MaterialParameter, Model, ModelPart, ModelPartAspect},
-    node::{NodeError, NodeResult, NodeType},
-    spatial::{Spatial, SpatialRef, Transform},
-    values::{ResourceID, color::rgba_linear},
+    Error,
+    client::{Client, ClientHandler},
+    drawable::{MaterialParameter, Model, ModelExt as _, ModelPart},
+    spatial::{Spatial, SpatialExt as _, SpatialRef, Transform},
+    types::{Resource, ResourceLoadError, rgba_linear},
 };
 
-use stardust_xr_panel_item::protocol::SurfaceUpdateTarget;
+use stardust_xr_panel_item::panel_item::SurfaceUpdateTarget;
+use tokio::task::AbortHandle;
 
 use crate::panel_shell::PanelShellHandler;
 
@@ -18,7 +22,7 @@ use crate::panel_shell::PanelShellHandler;
 pub struct SurfaceModel {
     transform: Transform,
     surface: SurfaceUpdateTarget,
-    model_resource: ResourceID,
+    model_resource: Resource,
     shell: Arc<PanelShellHandler>,
     part_path: String,
 }
@@ -26,11 +30,11 @@ impl SurfaceModel {
     pub fn new(
         shell: &BinderObject<PanelShellHandler>,
         surface: impl Into<SurfaceUpdateTarget>,
-        resource: ResourceID,
+        resource: Resource,
         surface_part_path: &str,
     ) -> Self {
         Self {
-            transform: Transform::none(),
+            transform: Transform::IDENTITY,
             shell: shell.handler_arc().clone(),
             part_path: surface_part_path.to_string(),
             model_resource: resource,
@@ -41,26 +45,30 @@ impl SurfaceModel {
 impl<State: ValidState> CustomElement<State> for SurfaceModel {
     type Inner = SurfaceModelInner;
 
-    type Resource = ();
-
-    type Error = NodeError;
+    type Error = Error;
 
     fn create_inner(
         &self,
-        _asteroids_context: &stardust_xr_asteroids::Context,
+        ctx: &stardust_xr_asteroids::Context,
         info: stardust_xr_asteroids::CreateInnerInfo,
-        _resource: &mut Self::Resource,
-    ) -> Result<Self::Inner, Self::Error> {
-        SurfaceModelInner::new(info.parent_space, self)
+    ) -> impl Future<Output = Result<Self::Inner, Self::Error>> {
+        SurfaceModelInner::new(info.parent_space, &ctx.stardust_client, self)
     }
 
-    fn diff(&self, old_self: &Self, inner: &mut Self::Inner, _resource: &mut Self::Resource) {
+    fn diff(
+        &self,
+        old_self: &Self,
+        _ctx: &stardust_xr_asteroids::Context,
+        inner: &mut Self::Inner,
+    ) {
         self.apply_transform(old_self, &inner.root);
         if self.model_resource != old_self.model_resource {
-            _ = inner.recreate_model(self);
+            tracing::warn!(
+                "changing the SurfaceModel resource after creation is currently not supported"
+            )
         } else if self.part_path != old_self.part_path {
-            if let Ok(new_part) = inner.model.part(&self.part_path) {
-                *inner.part.lock().unwrap() = new_part;
+            if let Some(new_part) = inner.parts.get(&self.part_path) {
+                *inner.part.lock().unwrap() = new_part.clone();
             }
         }
         if inner
@@ -86,38 +94,32 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                             let part = part.lock().unwrap();
                             _ = part.set_material_parameter(
                                 "opaque",
-                                MaterialParameter::Bool(msg.opaque),
+                                MaterialParameter::Bool { value: msg.opaque },
                             );
-                            _ = part.set_material_parameter("unlit", MaterialParameter::Bool(true));
+                            _ = part.set_material_parameter(
+                                "unlit",
+                                MaterialParameter::Bool { value: true },
+                            );
                             _ = part.set_material_parameter(
                                 "color",
-                                MaterialParameter::Color(rgba_linear!(1.0, 1.0, 1.0, 1.0)),
-                            );
-                            let dmatex_id = part.client().generate_id();
-                            _ = drawable::import_dmatex_uid(
-                                part.client(),
-                                dmatex_id,
-                                msg.dmatex_uid,
+                                MaterialParameter::Color {
+                                    value: rgba_linear!(1.0, 1.0, 1.0, 1.0),
+                                },
                             );
                             _ = part.set_material_parameter(
                                 "diffuse",
-                                MaterialParameter::Dmatex(DmatexSubmitInfo {
-                                    dmatex_id,
+                                MaterialParameter::Dmatex {
+                                    dmatex: msg.dmatex,
                                     acquire_point: msg.acquire_point,
                                     release_point: msg.release_point,
-                                }),
+                                },
                             );
-                            _ = drawable::unregister_dmatex(part.client(), dmatex_id);
                         }
                     }
                 }
             });
-            inner.task.replace(task.into());
+            inner.task.replace(task.abort_handle());
         }
-    }
-
-    fn spatial_aspect(&self, inner: &Self::Inner) -> stardust_xr_fusion::spatial::SpatialRef {
-        inner.root.clone().as_spatial_ref()
     }
 }
 impl Transformable for SurfaceModel {
@@ -132,27 +134,43 @@ impl Transformable for SurfaceModel {
 pub struct SurfaceModelInner {
     root: Spatial,
     part: Arc<Mutex<ModelPart>>,
-    model: Model,
-    task: Option<AbortOnDrop>,
+    _model: Model,
+    task: Option<AbortHandle>,
+    parts: HashMap<String, ModelPart>,
 }
 impl SurfaceModelInner {
-    fn new(parent: &SpatialRef, info: &SurfaceModel) -> NodeResult<Self> {
-        let root = Spatial::create(parent, info.transform)?;
-        let model = Model::create(&root, Transform::identity(), &info.model_resource)?;
-        let part = model.part(&info.part_path)?;
+    async fn new(
+        parent: SpatialRef,
+        client: &Client<impl ClientHandler>,
+        info: &SurfaceModel,
+    ) -> stardust_xr_fusion::Result<Self> {
+        let (root, _) = Spatial::create(client, &parent, info.transform).await?;
+        let model = Model::create(client, &root, info.model_resource.clone()).await?;
+        let model_parts = model.enumerate_parts().await?;
+        let mut parts = HashMap::with_capacity(model_parts.len());
+        for part in model_parts {
+            let Ok(path) = part.get_part_path().await else {
+                continue;
+            };
+            parts.insert(path, part);
+        }
+        let part = model
+            .get_part(&info.part_path)
+            .await?
+            .ok_or(Error::ResourceLoad(ResourceLoadError::NotFound))?;
         Ok(SurfaceModelInner {
             root,
             part: Arc::new(Mutex::new(part)),
-            model,
+            _model: model,
+            parts,
             task: None,
         })
     }
-    fn recreate_model(&mut self, info: &SurfaceModel) -> NodeResult<()> {
-        let model = Model::create(&self.root, info.transform, &info.model_resource)?;
-        let part = model.part(&info.part_path)?;
-        self.model = model;
-        *self.part.lock().unwrap() = part;
-        self.task.take();
-        Ok(())
+}
+impl Drop for SurfaceModelInner {
+    fn drop(&mut self) {
+        if let Some(task) = self.task.take() {
+            task.abort();
+        }
     }
 }
