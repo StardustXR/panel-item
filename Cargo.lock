@@ -257,10 +257,9 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "binderbinder"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/binderbinder#c5eab359d922500717674db5d8727eb394511bd8"
+source = "git+https://github.com/technobaboo/binderbinder#be24952c02486e745c7b9d63f9cd77b42ecefdc7"
 dependencies = [
  "bitflags 2.11.0",
- "byteorder",
  "dashmap",
  "rustix",
  "thiserror 2.0.18",
@@ -976,7 +975,7 @@ dependencies = [
 [[package]]
 name = "gluon"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#3e7f048d661e8d8100ef4c794a90d1a69a714e13"
+source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
 dependencies = [
  "binderbinder",
  "bitflags 2.11.0",
@@ -989,7 +988,7 @@ dependencies = [
 [[package]]
 name = "gluon-codegen"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#3e7f048d661e8d8100ef4c794a90d1a69a714e13"
+source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
 dependencies = [
  "convert_case 0.11.0",
  "gluon",
@@ -1003,7 +1002,7 @@ dependencies = [
 [[package]]
 name = "gluon-derive"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#3e7f048d661e8d8100ef4c794a90d1a69a714e13"
+source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
 dependencies = [
  "quote",
  "syn 2.0.117",
@@ -1012,7 +1011,7 @@ dependencies = [
 [[package]]
 name = "gluon-parser"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/gluon#3e7f048d661e8d8100ef4c794a90d1a69a714e13"
+source = "git+https://github.com/technobaboo/gluon#7910659982fbfa2d6e31f8741636f6af6b6836a8"
 dependencies = [
  "ansi_term",
  "chumsky",
@@ -1698,7 +1697,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 [[package]]
 name = "pion-binder"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/pion#503e94f992dc61dd28bd29cb646de1deedf65cb2"
+source = "git+https://github.com/technobaboo/pion#c11a613d26a493e0da8a1e82ea4c06c350a10a59"
 dependencies = [
  "async-trait",
  "binderbinder",

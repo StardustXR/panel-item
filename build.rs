@@ -12,8 +12,9 @@ fn main() {
         PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("src/protocol.rs");
     gen_single_module(
         "./schemas/org.stardustxr.item.Panel.gluon",
-        !Derives::DEFAULT,
+        !(Derives::DEFAULT | Derives::SERDE),
         &[],
+        false,
         output_file,
     );
 

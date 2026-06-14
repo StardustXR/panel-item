@@ -639,7 +639,8 @@ impl PanelItem {
         self.obj.device().transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())?;
         let transaction = gluon_recv.recv().await.unwrap();
         let mut reader = gluon::DataReader::from_payload(transaction.payload);
-        Ok(gluon::Convertable::read(&mut reader)?)
+        let __ret_id = gluon::Convertable::read(&mut reader)?;
+        Ok(__ret_id)
     }
     pub fn absolute_pointer_motion(
         &self,
@@ -1456,10 +1457,9 @@ impl PanelItemAcceptor {
         self.obj.device().transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())?;
         let transaction = gluon_recv.recv().await.unwrap();
         let mut reader = gluon::DataReader::from_payload(transaction.payload);
-        Ok((
-            gluon::Convertable::read(&mut reader)?,
-            gluon::Convertable::read(&mut reader)?,
-        ))
+        let __ret_shell = gluon::Convertable::read(&mut reader)?;
+        let __ret_output_spatial = gluon::Convertable::read(&mut reader)?;
+        Ok((__ret_shell, __ret_output_spatial))
     }
     pub async fn get_field(&self) -> Result<FieldRefId, gluon::SendError> {
         let mut gluon_builder = gluon::DataBuilder::new();
@@ -1469,7 +1469,8 @@ impl PanelItemAcceptor {
         self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
         let transaction = gluon_recv.recv().await.unwrap();
         let mut reader = gluon::DataReader::from_payload(transaction.payload);
-        Ok(gluon::Convertable::read(&mut reader)?)
+        let __ret_field = gluon::Convertable::read(&mut reader)?;
+        Ok(__ret_field)
     }
     pub fn from_handler<H: PanelItemAcceptorHandler>(
         obj: &impl gluon::OwnedObjectRef<H>,
