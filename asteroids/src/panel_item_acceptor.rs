@@ -6,7 +6,7 @@ use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState}
 use stardust_xr_fusion::{
     Error,
     fields::{Field, FieldExt as _, Shape},
-    query::{QueryExt, QueryableInterfaceGuard, QueryableObject},
+    query::{QueryableExt, QueryableInterfaceGuard, QueryableObject},
     spatial::{CreatedSpatial, Spatial, SpatialExt, SpatialInterface, SpatialRef, Transform},
 };
 use stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler as _;
@@ -57,8 +57,8 @@ impl<State: ValidState> CustomElement<State> for PanelItemAcceptor<State> {
     ) -> Result<Self::Inner, Self::Error> {
         let client = &ctx.stardust_client;
         let (spatial, spatial_ref) =
-            Spatial::create(client, &info.parent_space, self.transform).await?;
-        let (field, _) = Field::create(client, &spatial, self.shape.clone()).await?;
+            Spatial::new(client, &info.parent_space, self.transform).await?;
+        let (field, _) = Field::new(client, &spatial, self.shape.clone()).await?;
         let (tx, rx) = mpsc::unbounded_channel();
         let handler = client
             .pion_device()
@@ -68,7 +68,7 @@ impl<State: ValidState> CustomElement<State> for PanelItemAcceptor<State> {
                 spatial_ref,
                 spatial_interface: ctx.stardust_client.spatial_interface().clone(),
             });
-        let _queryable = QueryableObject::create(client, spatial.clone(), field.clone()).await?;
+        let _queryable = QueryableObject::new(client, spatial.clone(), field.clone()).await?;
         let _interface_guard = _queryable
             .add_interface(
                 &handler,

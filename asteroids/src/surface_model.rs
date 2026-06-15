@@ -144,8 +144,8 @@ impl SurfaceModelInner {
         client: &Client<impl ClientHandler>,
         info: &SurfaceModel,
     ) -> stardust_xr_fusion::Result<Self> {
-        let (root, _) = Spatial::create(client, &parent, info.transform).await?;
-        let model = Model::create(client, &root, info.model_resource.clone()).await?;
+        let (root, _) = Spatial::new(client, &parent, info.transform).await?;
+        let model = Model::new(client, &root, info.model_resource.clone()).await?;
         let model_parts = model.enumerate_parts().await?;
         let mut parts = HashMap::with_capacity(model_parts.len());
         for part in model_parts {
