@@ -642,32 +642,20 @@ impl PanelItem {
         let __ret_id = gluon::Convertable::read(&mut reader)?;
         Ok(__ret_id)
     }
-    pub fn absolute_pointer_motion(
+    pub fn pointer_motion(
         &self,
         surface: impl Into<SurfaceId>,
+        delta: impl Into<Option<Vec2>>,
         position: impl Into<Vec2>,
     ) -> Result<(), gluon::SendError> {
         let surface: SurfaceId = surface.into();
+        let delta: Option<Vec2> = delta.into();
         let position: Vec2 = position.into();
         let mut gluon_builder = gluon::DataBuilder::new();
         surface.write(&mut gluon_builder)?;
+        delta.write(&mut gluon_builder)?;
         position.write(&mut gluon_builder)?;
         self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
-        Ok(())
-    }
-    pub fn relative_pointer_motion(
-        &self,
-        surface: impl Into<SurfaceId>,
-        delta: impl Into<Vec2>,
-    ) -> Result<(), gluon::SendError> {
-        let surface: SurfaceId = surface.into();
-        let delta: Vec2 = delta.into();
-        let mut gluon_builder = gluon::DataBuilder::new();
-        surface.write(&mut gluon_builder)?;
-        delta.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn pointer_button(
@@ -685,7 +673,7 @@ impl PanelItem {
         pressed.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn pointer_scroll_pixels(
@@ -703,7 +691,7 @@ impl PanelItem {
         source.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn pointer_scroll_discrete(
@@ -721,7 +709,7 @@ impl PanelItem {
         source.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn pointer_scroll_stop(
@@ -733,7 +721,7 @@ impl PanelItem {
         surface.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn key(
@@ -754,7 +742,7 @@ impl PanelItem {
         pressed.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn touch_down(
@@ -772,7 +760,7 @@ impl PanelItem {
         position.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn touch_move(
@@ -787,7 +775,7 @@ impl PanelItem {
         position.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn touch_up(&self, touch_id: impl Into<u32>) -> Result<(), gluon::SendError> {
@@ -796,21 +784,21 @@ impl PanelItem {
         touch_id.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn close_toplevel(&self) -> Result<(), gluon::SendError> {
         let mut gluon_builder = gluon::DataBuilder::new();
         self.obj
             .device()
-            .transact_one_way(&self.obj, 19u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn resize_toplevel_to_app_request(&self) -> Result<(), gluon::SendError> {
         let mut gluon_builder = gluon::DataBuilder::new();
         self.obj
             .device()
-            .transact_one_way(&self.obj, 20u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 19u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn request_toplevel_resize(
@@ -822,7 +810,7 @@ impl PanelItem {
         new_size.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 21u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 20u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn toplevel_focused(
@@ -834,7 +822,7 @@ impl PanelItem {
         focused.write(&mut gluon_builder)?;
         self.obj
             .device()
-            .transact_one_way(&self.obj, 22u32, gluon_builder.to_payload())?;
+            .transact_one_way(&self.obj, 21u32, gluon_builder.to_payload())?;
         Ok(())
     }
     pub fn from_handler<H: PanelItemHandler>(
@@ -874,17 +862,12 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         _ctx: gluon::Context,
         xkb_keymap: String,
     ) -> impl Future<Output = KeymapId> + Send + Sync;
-    fn absolute_pointer_motion(
+    fn pointer_motion(
         &self,
         _ctx: gluon::Context,
         surface: SurfaceId,
+        delta: Option<Vec2>,
         position: Vec2,
-    ) -> impl Future<Output = ()> + Send + Sync;
-    fn relative_pointer_motion(
-        &self,
-        _ctx: gluon::Context,
-        surface: SurfaceId,
-        delta: Vec2,
     ) -> impl Future<Output = ()> + Send + Sync;
     fn pointer_button(
         &self,
@@ -977,18 +960,13 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                 }
                 9u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
+                    let param_delta = gluon::Convertable::read(&mut gluon_data)?;
                     let param_position = gluon::Convertable::read(&mut gluon_data)?;
                     drop(gluon_data);
-                    self.absolute_pointer_motion(ctx, param_surface, param_position)
+                    self.pointer_motion(ctx, param_surface, param_delta, param_position)
                         .await;
                 }
                 10u32 => {
-                    let param_surface = gluon::Convertable::read(&mut gluon_data)?;
-                    let param_delta = gluon::Convertable::read(&mut gluon_data)?;
-                    drop(gluon_data);
-                    self.relative_pointer_motion(ctx, param_surface, param_delta).await;
-                }
-                11u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_button = gluon::Convertable::read(&mut gluon_data)?;
                     let param_pressed = gluon::Convertable::read(&mut gluon_data)?;
@@ -996,7 +974,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                     self.pointer_button(ctx, param_surface, param_button, param_pressed)
                         .await;
                 }
-                12u32 => {
+                11u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_delta = gluon::Convertable::read(&mut gluon_data)?;
                     let param_source = gluon::Convertable::read(&mut gluon_data)?;
@@ -1009,7 +987,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                         )
                         .await;
                 }
-                13u32 => {
+                12u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_delta = gluon::Convertable::read(&mut gluon_data)?;
                     let param_source = gluon::Convertable::read(&mut gluon_data)?;
@@ -1022,12 +1000,12 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                         )
                         .await;
                 }
-                14u32 => {
+                13u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     drop(gluon_data);
                     self.pointer_scroll_stop(ctx, param_surface).await;
                 }
-                15u32 => {
+                14u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_keymap = gluon::Convertable::read(&mut gluon_data)?;
                     let param_key = gluon::Convertable::read(&mut gluon_data)?;
@@ -1036,7 +1014,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                     self.key(ctx, param_surface, param_keymap, param_key, param_pressed)
                         .await;
                 }
-                16u32 => {
+                15u32 => {
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_touch_id = gluon::Convertable::read(&mut gluon_data)?;
                     let param_position = gluon::Convertable::read(&mut gluon_data)?;
@@ -1044,31 +1022,31 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                     self.touch_down(ctx, param_surface, param_touch_id, param_position)
                         .await;
                 }
-                17u32 => {
+                16u32 => {
                     let param_touch_id = gluon::Convertable::read(&mut gluon_data)?;
                     let param_position = gluon::Convertable::read(&mut gluon_data)?;
                     drop(gluon_data);
                     self.touch_move(ctx, param_touch_id, param_position).await;
                 }
-                18u32 => {
+                17u32 => {
                     let param_touch_id = gluon::Convertable::read(&mut gluon_data)?;
                     drop(gluon_data);
                     self.touch_up(ctx, param_touch_id).await;
                 }
-                19u32 => {
+                18u32 => {
                     drop(gluon_data);
                     self.close_toplevel(ctx).await;
                 }
-                20u32 => {
+                19u32 => {
                     drop(gluon_data);
                     self.resize_toplevel_to_app_request(ctx).await;
                 }
-                21u32 => {
+                20u32 => {
                     let param_new_size = gluon::Convertable::read(&mut gluon_data)?;
                     drop(gluon_data);
                     self.request_toplevel_resize(ctx, param_new_size).await;
                 }
-                22u32 => {
+                21u32 => {
                     let param_focused = gluon::Convertable::read(&mut gluon_data)?;
                     drop(gluon_data);
                     self.toplevel_focused(ctx, param_focused).await;
