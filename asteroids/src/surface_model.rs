@@ -91,29 +91,37 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                     loop {
                         let mut recv = recv.write().await;
                         if let Some(msg) = recv.recv().await {
-                            let part = part.lock().unwrap();
-                            _ = part.set_material_parameter(
-                                "opaque",
-                                MaterialParameter::Bool { value: msg.opaque },
-                            );
-                            _ = part.set_material_parameter(
-                                "unlit",
-                                MaterialParameter::Bool { value: true },
-                            );
-                            _ = part.set_material_parameter(
-                                "color",
-                                MaterialParameter::Color {
-                                    value: rgba_linear!(1.0, 1.0, 1.0, 1.0),
-                                },
-                            );
-                            _ = part.set_material_parameter(
-                                "diffuse",
-                                MaterialParameter::Dmatex {
-                                    dmatex: msg.dmatex,
-                                    acquire_point: msg.acquire_point,
-                                    release_point: msg.release_point,
-                                },
-                            );
+                            let part = part.lock().unwrap().clone();
+                            _ = part
+                                .set_material_parameter(
+                                    "opaque",
+                                    MaterialParameter::Bool { value: msg.opaque },
+                                )
+                                .await;
+                            _ = part
+                                .set_material_parameter(
+                                    "unlit",
+                                    MaterialParameter::Bool { value: true },
+                                )
+                                .await;
+                            _ = part
+                                .set_material_parameter(
+                                    "color",
+                                    MaterialParameter::Color {
+                                        value: rgba_linear!(1.0, 1.0, 1.0, 1.0),
+                                    },
+                                )
+                                .await;
+                            _ = part
+                                .set_material_parameter(
+                                    "diffuse",
+                                    MaterialParameter::Dmatex {
+                                        dmatex: msg.dmatex,
+                                        acquire_point: msg.acquire_point,
+                                        release_point: msg.release_point,
+                                    },
+                                )
+                                .await;
                         }
                     }
                 }
