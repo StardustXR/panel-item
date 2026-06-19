@@ -69,7 +69,14 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
         })
     }
 
-    fn diff(&self, _old: &Self, _context: &Context, _inner: &mut Self::Inner) {}
+    fn diff(
+        &self,
+        _old: &Self,
+        _context: &Context,
+        _create_info: ComponentCreateInfo<'_>,
+        _inner: &mut Self::Inner,
+    ) {
+    }
     fn frame(
         &self,
         _context: &Context,
