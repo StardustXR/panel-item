@@ -210,7 +210,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "binderbinder"
 version = "0.1.0"
-source = "git+https://github.com/technobaboo/binderbinder#be24952c02486e745c7b9d63f9cd77b42ecefdc7"
+source = "git+https://github.com/technobaboo/binderbinder#bc67300889b264553697fd5d720a929c21571954"
 dependencies = [
  "bitflags",
  "dashmap",
@@ -1662,7 +1662,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-asteroids"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/asteroids?branch=binder#fdf90edc54f0e02088fd024f3bde41da4bcf5861"
+source = "git+https://github.com/StardustXR/asteroids?branch=binder#7746a86f6438ff355b151709a8b8ab605c73367d"
 dependencies = [
  "bumpalo",
  "derive-where",
@@ -1671,7 +1671,7 @@ dependencies = [
  "directories",
  "futures",
  "futures-util",
- "glam 0.30.10",
+ "glam 0.29.3",
  "gluon",
  "inotify",
  "map-range",
@@ -1680,7 +1680,6 @@ dependencies = [
  "ron",
  "rustc-hash",
  "serde",
- "shiva-color-rs",
  "stardust-xr-fusion",
  "stardust-xr-molecules",
  "tokio",
@@ -1691,7 +1690,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-fusion"
 version = "0.51.1"
-source = "git+https://github.com/StardustXR/core?branch=binder#7f0147719c754fa6620fcdc4d1e8dfb9539e0691"
+source = "git+https://github.com/StardustXR/core?branch=binder#bdf8ce105f5f1c0404ab375f93fd9c720a078ea7"
 dependencies = [
  "glam 0.30.10",
  "gluon",
@@ -1707,7 +1706,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-molecules"
 version = "0.51.0"
-source = "git+https://github.com/StardustXR/molecules.git?branch=binder#df021b63840902622f6a35cd36b8a2485e6cfc96"
+source = "git+https://github.com/StardustXR/molecules.git?branch=binder#7b6aec6cd965a81cab254033d3d7dee265a67424"
 dependencies = [
  "futures",
  "glam 0.29.3",
@@ -1728,7 +1727,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-molecules-protocols"
 version = "0.1.0"
-source = "git+https://github.com/StardustXR/molecules.git?branch=binder#df021b63840902622f6a35cd36b8a2485e6cfc96"
+source = "git+https://github.com/StardustXR/molecules.git?branch=binder#7b6aec6cd965a81cab254033d3d7dee265a67424"
 dependencies = [
  "gluon",
  "gluon-codegen",
@@ -1775,7 +1774,7 @@ dependencies = [
 [[package]]
 name = "stardust-xr-protocol"
 version = "0.51.1"
-source = "git+https://github.com/StardustXR/core?branch=binder#7f0147719c754fa6620fcdc4d1e8dfb9539e0691"
+source = "git+https://github.com/StardustXR/core?branch=binder#bdf8ce105f5f1c0404ab375f93fd9c720a078ea7"
 dependencies = [
  "fnv",
  "glam 0.29.3",
