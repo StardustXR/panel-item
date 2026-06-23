@@ -4,16 +4,19 @@ import "org.stardustxr.Dmatex" as dmatex
 
 /// PanelItem
 interface PanelItem {
+    /// delta and position are +Y == Down +X == Right
 	pointer_motion(surface: SurfaceId, delta: Option<types::Vec2f>, position: types::Vec2f, timestamp: Option<types::Timestamp>)
-	// uses event ids from `input_event_codes.h`
+	/// uses event ids from `input_event_codes.h`
 	pointer_button(surface: SurfaceId, button: u32, pressed: bool, timestamp: Option<types::Timestamp>)
-	// TODO: expose stop timestamp?
+    /// delta is +Y == Down +X == Right
 	pointer_scroll_pixels(surface: SurfaceId, delta: types::Vec2f, source: ScrollSource, timestamp: Option<types::Timestamp>)
+    /// delta is +Y == Down +X == Right
 	pointer_scroll_discrete(surface: SurfaceId, delta: types::Vec2f, source: ScrollSource, timestamp: Option<types::Timestamp>)
-	// TODO: expose stop timestamp?
 	pointer_scroll_stop(surface: SurfaceId, timestamp: Option<types::Timestamp>)
 	key(surface: SurfaceId, key: u32, pressed: bool, modifier_state: ModifierState, keymap: Ref<keymap::Keymap>, timestamp: Option<types::Timestamp>)
+    /// position is +Y == Down +X == Right
 	touch_down(surface: SurfaceId, touch_id: u32, position: types::Vec2f, timestamp: Option<types::Timestamp>)
+    /// position is +Y == Down +X == Right
 	touch_move(touch_id: u32, position: types::Vec2f, timestamp: Option<types::Timestamp>)
 	touch_up(touch_id: u32, timestamp: Option<types::Timestamp>)
 
@@ -100,12 +103,14 @@ struct PanelItemInitData {
 
 /// Rect
 struct Rect {
+    /// this is +Y == Down +X == Right
 	origin: types::Vec2f,
 	size: types::Vec2f,
 }
 
 /// Geometry
 struct Geometry {
+    /// this is +Y == Down +X == Right
 	origin: types::Vec2i,
 	size: types::Size2,
 }

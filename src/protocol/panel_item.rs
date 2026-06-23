@@ -285,6 +285,7 @@ impl gluon::Convertable for PanelItemInitData {
 #[derive(Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rect {
+    ///this is +Y == Down +X == Right
     pub origin: stardust_xr_protocol::types::proxies::Vec2F,
     pub size: stardust_xr_protocol::types::proxies::Vec2F,
 }
@@ -343,6 +344,7 @@ impl gluon::Convertable for Rect {
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Geometry {
+    ///this is +Y == Down +X == Right
     pub origin: stardust_xr_protocol::types::proxies::Vec2I,
     pub size: stardust_xr_protocol::types::proxies::Size2,
 }
@@ -592,6 +594,7 @@ impl gluon::Convertable for PanelItem {
     }
 }
 impl PanelItem {
+    ///delta and position are +Y == Down +X == Right
     pub fn pointer_motion(
         &self,
         surface: impl Into<SurfaceId>,
@@ -616,6 +619,7 @@ impl PanelItem {
         self.obj.device().transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())?;
         Ok(())
     }
+    ///uses event ids from `input_event_codes.h`
     pub fn pointer_button(
         &self,
         surface: impl Into<SurfaceId>,
@@ -639,6 +643,7 @@ impl PanelItem {
         self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
         Ok(())
     }
+    ///delta is +Y == Down +X == Right
     pub fn pointer_scroll_pixels(
         &self,
         surface: impl Into<SurfaceId>,
@@ -664,6 +669,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
         Ok(())
     }
+    ///delta is +Y == Down +X == Right
     pub fn pointer_scroll_discrete(
         &self,
         surface: impl Into<SurfaceId>,
@@ -739,6 +745,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
         Ok(())
     }
+    ///position is +Y == Down +X == Right
     pub fn touch_down(
         &self,
         surface: impl Into<SurfaceId>,
@@ -764,6 +771,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
         Ok(())
     }
+    ///position is +Y == Down +X == Right
     pub fn touch_move(
         &self,
         touch_id: impl Into<u32>,
@@ -885,6 +893,7 @@ impl PartialEq for PanelItem {
 }
 impl Eq for PanelItem {}
 pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
+    ///delta and position are +Y == Down +X == Right
     fn pointer_motion(
         &self,
         _ctx: gluon::Context,
@@ -893,6 +902,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         position: stardust_xr_protocol::types::proxies::Vec2F,
         timestamp: Option<stardust_xr_protocol::types::Timestamp>,
     ) -> impl Future<Output = ()> + Send + Sync;
+    ///uses event ids from `input_event_codes.h`
     fn pointer_button(
         &self,
         _ctx: gluon::Context,
@@ -901,6 +911,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         pressed: bool,
         timestamp: Option<stardust_xr_protocol::types::Timestamp>,
     ) -> impl Future<Output = ()> + Send + Sync;
+    ///delta is +Y == Down +X == Right
     fn pointer_scroll_pixels(
         &self,
         _ctx: gluon::Context,
@@ -909,6 +920,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         source: ScrollSource,
         timestamp: Option<stardust_xr_protocol::types::Timestamp>,
     ) -> impl Future<Output = ()> + Send + Sync;
+    ///delta is +Y == Down +X == Right
     fn pointer_scroll_discrete(
         &self,
         _ctx: gluon::Context,
@@ -933,6 +945,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         keymap: stardust_xr_protocol::keymap::Keymap,
         timestamp: Option<stardust_xr_protocol::types::Timestamp>,
     ) -> impl Future<Output = ()> + Send + Sync;
+    ///position is +Y == Down +X == Right
     fn touch_down(
         &self,
         _ctx: gluon::Context,
@@ -941,6 +954,7 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         position: stardust_xr_protocol::types::proxies::Vec2F,
         timestamp: Option<stardust_xr_protocol::types::Timestamp>,
     ) -> impl Future<Output = ()> + Send + Sync;
+    ///position is +Y == Down +X == Right
     fn touch_move(
         &self,
         _ctx: gluon::Context,
