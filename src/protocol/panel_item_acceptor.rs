@@ -1,5 +1,6 @@
 #![allow(unused, clippy::all, private_bounds, private_interfaces)]
-use gluon::Convertable;
+use gluon::Convertable as _;
+use tracing::Instrument as _;
 pub const EXTERNAL_PROTOCOL: gluon::ExternalProtocol = gluon::ExternalProtocol {
     protocol_name: "org.stardustxr.item.PanelAcceptor",
     types: &[],
@@ -28,6 +29,9 @@ impl gluon::Convertable for PanelItemAcceptor {
     ) -> Result<(), gluon::WriteError> {
         self.obj.write_owned(gluon_data)
     }
+}
+impl gluon::Interface for PanelItemAcceptor {
+    const ID: &'static str = "org.stardustxr.item.PanelAcceptor.PanelItemAcceptor";
 }
 impl PanelItemAcceptor {
     pub async fn accept(
@@ -79,6 +83,16 @@ impl gluon::ToObjectOrRef for PanelItemAcceptor {
         self.obj.clone()
     }
 }
+impl gluon::Liveness for PanelItemAcceptor {
+    fn alive(&self) -> bool {
+        gluon::Liveness::alive(&self.obj)
+    }
+    fn death_notification(
+        &self,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send>> {
+        gluon::Liveness::death_notification(&self.obj)
+    }
+}
 impl std::hash::Hash for PanelItemAcceptor {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.obj.hash(state);
@@ -101,6 +115,20 @@ pub trait PanelItemAcceptorHandler: gluon::Handler + Send + Sync + 'static {
             stardust_xr_protocol::spatial::SpatialRef,
         ),
     > + Send + Sync;
+    ///Dispatched instead of [`Self::accept`] so a slow reply doesn't hold up dispatch of the next transaction. The default implementation just awaits `accept` and sends the result through `reply`. Override this method instead of `accept` to defer the reply: stash `reply` (it's `Send + Sync + 'static`) somewhere else — a channel, a queue, another task — and return as soon as this method's future is done, without waiting for the reply to actually be sent.
+    fn accept_oneway(
+        &self,
+        _ctx: gluon::Context,
+        item: super::panel_item::PanelItem,
+        reply: gluon::ReplySender<
+            (super::panel_item::PanelShell, stardust_xr_protocol::spatial::SpatialRef),
+        >,
+    ) -> impl Future<Output = Result<(), gluon::SendError>> + Send + Sync {
+        async move {
+            let (shell, output_spatial) = self.accept(_ctx, item).await;
+            reply.send((shell, output_spatial))
+        }
+    }
     fn dispatch_one_way(
         &self,
         transaction_code: u32,
@@ -111,23 +139,37 @@ pub trait PanelItemAcceptorHandler: gluon::Handler + Send + Sync + 'static {
             match transaction_code {
                 8u32 => {
                     let return_callback = gluon_data.read_binder()?;
-                    let mut gluon_out = gluon::DataBuilder::new();
                     let param_item = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelItemAcceptor", method = "accept", ? param_item,
                         "dispatching"
                     );
-                    let (shell, output_spatial) = self.accept(ctx, param_item).await;
                     drop(gluon_data);
-                    tracing::trace!(
-                        interface = "PanelItemAcceptor", method = "accept", ? shell, ?
-                        output_spatial, "←"
+                    let reply: gluon::ReplySender<
+                        (
+                            super::panel_item::PanelShell,
+                            stardust_xr_protocol::spatial::SpatialRef,
+                        ),
+                    > = gluon::ReplySender::new(
+                        return_callback,
+                        |(shell, output_spatial), gluon_out| {
+                            tracing::trace!(
+                                interface = "PanelItemAcceptor", method = "accept", ? shell,
+                                ? output_spatial, "←"
+                            );
+                            shell.write_owned(gluon_out)?;
+                            output_spatial.write_owned(gluon_out)?;
+                            Ok(())
+                        },
                     );
-                    shell.write_owned(&mut gluon_out)?;
-                    output_spatial.write_owned(&mut gluon_out)?;
-                    return_callback
-                        .device()
-                        .transact_one_way(&return_callback, 0, gluon_out.to_payload())?;
+                    self.accept_oneway(ctx, param_item, reply)
+                        .instrument(
+                            tracing::trace_span!(
+                                "dispatching", interface = "PanelItemAcceptor", method =
+                                "accept", method_id = 8u32
+                            ),
+                        )
+                        .await?;
                 }
                 _ => {}
             }
