@@ -599,7 +599,7 @@ impl gluon::Interface for PanelItem {
 }
 impl PanelItem {
     ///delta and position are +Y == Down +X == Right
-    pub fn pointer_motion(
+    pub fn pointer_motion_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         delta: Option<stardust_xr_protocol::types::proxies::Vec2F>,
@@ -648,7 +648,7 @@ impl PanelItem {
     }
     ///delta and position are +Y == Down +X == Right
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn pointer_motion_event(
+    pub fn pointer_motion(
         &self,
         surface: impl Into<SurfaceId>,
         delta: Option<stardust_xr_protocol::types::proxies::Vec2F>,
@@ -675,7 +675,7 @@ impl PanelItem {
         Ok(())
     }
     ///uses event ids from `input_event_codes.h`
-    pub fn pointer_button(
+    pub fn pointer_button_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         button: impl Into<u32>,
@@ -723,7 +723,7 @@ impl PanelItem {
     }
     ///uses event ids from `input_event_codes.h`
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn pointer_button_event(
+    pub fn pointer_button(
         &self,
         surface: impl Into<SurfaceId>,
         button: impl Into<u32>,
@@ -749,7 +749,7 @@ impl PanelItem {
         Ok(())
     }
     ///delta is +Y == Down +X == Right
-    pub fn pointer_scroll_pixels(
+    pub fn pointer_scroll_pixels_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         delta: stardust_xr_protocol::types::proxies::Vec2F,
@@ -797,7 +797,7 @@ impl PanelItem {
     }
     ///delta is +Y == Down +X == Right
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn pointer_scroll_pixels_event(
+    pub fn pointer_scroll_pixels(
         &self,
         surface: impl Into<SurfaceId>,
         delta: stardust_xr_protocol::types::proxies::Vec2F,
@@ -825,7 +825,7 @@ impl PanelItem {
         Ok(())
     }
     ///delta is +Y == Down +X == Right
-    pub fn pointer_scroll_discrete(
+    pub fn pointer_scroll_discrete_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         delta: stardust_xr_protocol::types::proxies::Vec2F,
@@ -873,7 +873,7 @@ impl PanelItem {
     }
     ///delta is +Y == Down +X == Right
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn pointer_scroll_discrete_event(
+    pub fn pointer_scroll_discrete(
         &self,
         surface: impl Into<SurfaceId>,
         delta: stardust_xr_protocol::types::proxies::Vec2F,
@@ -900,7 +900,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn pointer_scroll_stop(
+    pub fn pointer_scroll_stop_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
@@ -937,7 +937,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn pointer_scroll_stop_event(
+    pub fn pointer_scroll_stop(
         &self,
         surface: impl Into<SurfaceId>,
         timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
@@ -958,7 +958,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn key(
+    pub fn key_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         key: impl Into<u32>,
@@ -1015,7 +1015,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn key_event(
+    pub fn key(
         &self,
         surface: impl Into<SurfaceId>,
         key: impl Into<u32>,
@@ -1049,7 +1049,7 @@ impl PanelItem {
         Ok(())
     }
     ///position is +Y == Down +X == Right
-    pub fn touch_down(
+    pub fn touch_down_waiting(
         &self,
         surface: impl Into<SurfaceId>,
         touch_id: impl Into<u32>,
@@ -1097,7 +1097,7 @@ impl PanelItem {
     }
     ///position is +Y == Down +X == Right
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn touch_down_event(
+    pub fn touch_down(
         &self,
         surface: impl Into<SurfaceId>,
         touch_id: impl Into<u32>,
@@ -1125,7 +1125,7 @@ impl PanelItem {
         Ok(())
     }
     ///position is +Y == Down +X == Right
-    pub fn touch_move(
+    pub fn touch_move_waiting(
         &self,
         touch_id: impl Into<u32>,
         position: stardust_xr_protocol::types::proxies::Vec2F,
@@ -1168,7 +1168,7 @@ impl PanelItem {
     }
     ///position is +Y == Down +X == Right
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn touch_move_event(
+    pub fn touch_move(
         &self,
         touch_id: impl Into<u32>,
         position: stardust_xr_protocol::types::proxies::Vec2F,
@@ -1192,7 +1192,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn touch_up(
+    pub fn touch_up_waiting(
         &self,
         touch_id: impl Into<u32>,
         timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
@@ -1228,7 +1228,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn touch_up_event(
+    pub fn touch_up(
         &self,
         touch_id: impl Into<u32>,
         timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
@@ -1248,7 +1248,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn close_toplevel(&self) -> gluon::OnewayFuture {
+    pub fn close_toplevel_waiting(&self) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         tracing::trace!(interface = "PanelItem", method = "close_toplevel", "→");
         let mut gluon_builder = gluon::DataBuilder::new();
@@ -1270,7 +1270,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn close_toplevel_event(&self) -> Result<(), gluon::SendError> {
+    pub fn close_toplevel(&self) -> Result<(), gluon::SendError> {
         tracing::trace!(interface = "PanelItem", method = "close_toplevel", "→");
         let mut gluon_builder = gluon::DataBuilder::new();
         let gluon_ret: Option<gluon::ObjectOrRef> = None;
@@ -1280,7 +1280,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn resize_toplevel_to_app_request(&self) -> gluon::OnewayFuture {
+    pub fn resize_toplevel_to_app_request_waiting(&self) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         tracing::trace!(
             interface = "PanelItem", method = "resize_toplevel_to_app_request", "→"
@@ -1304,7 +1304,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn resize_toplevel_to_app_request_event(&self) -> Result<(), gluon::SendError> {
+    pub fn resize_toplevel_to_app_request(&self) -> Result<(), gluon::SendError> {
         tracing::trace!(
             interface = "PanelItem", method = "resize_toplevel_to_app_request", "→"
         );
@@ -1316,7 +1316,7 @@ impl PanelItem {
             .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn request_toplevel_resize(
+    pub fn request_toplevel_resize_waiting(
         &self,
         new_size: stardust_xr_protocol::types::proxies::Size2,
     ) -> gluon::OnewayFuture {
@@ -1348,7 +1348,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn request_toplevel_resize_event(
+    pub fn request_toplevel_resize(
         &self,
         new_size: stardust_xr_protocol::types::proxies::Size2,
     ) -> Result<(), gluon::SendError> {
@@ -1366,7 +1366,10 @@ impl PanelItem {
             .transact_one_way(&self.obj, 19u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_focused(&self, focused: impl Into<bool>) -> gluon::OnewayFuture {
+    pub fn toplevel_focused_waiting(
+        &self,
+        focused: impl Into<bool>,
+    ) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         let focused: bool = focused.into();
         tracing::trace!(
@@ -1394,7 +1397,7 @@ impl PanelItem {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_focused_event(
+    pub fn toplevel_focused(
         &self,
         focused: impl Into<bool>,
     ) -> Result<(), gluon::SendError> {
@@ -2049,7 +2052,7 @@ impl gluon::Interface for PanelShell {
     const ID: &'static str = "org.stardustxr.item.Panel.PanelShell";
 }
 impl PanelShell {
-    pub fn update_surface_dmatex(
+    pub fn update_surface_dmatex_waiting(
         &self,
         surface: impl Into<SurfaceUpdateTarget>,
         dmatex: impl Into<stardust_xr_protocol::dmatex::DmatexRef>,
@@ -2102,7 +2105,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn update_surface_dmatex_event(
+    pub fn update_surface_dmatex(
         &self,
         surface: impl Into<SurfaceUpdateTarget>,
         dmatex: impl Into<stardust_xr_protocol::dmatex::DmatexRef>,
@@ -2131,7 +2134,7 @@ impl PanelShell {
         self.obj.device().transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_resized(
+    pub fn toplevel_resized_waiting(
         &self,
         new_size: stardust_xr_protocol::types::proxies::Size2,
     ) -> gluon::OnewayFuture {
@@ -2162,7 +2165,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_resized_event(
+    pub fn toplevel_resized(
         &self,
         new_size: stardust_xr_protocol::types::proxies::Size2,
     ) -> Result<(), gluon::SendError> {
@@ -2177,7 +2180,7 @@ impl PanelShell {
         self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_max_size(
+    pub fn toplevel_max_size_waiting(
         &self,
         max_size: Option<stardust_xr_protocol::types::proxies::Size2>,
     ) -> gluon::OnewayFuture {
@@ -2209,7 +2212,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_max_size_event(
+    pub fn toplevel_max_size(
         &self,
         max_size: Option<stardust_xr_protocol::types::proxies::Size2>,
     ) -> Result<(), gluon::SendError> {
@@ -2227,7 +2230,7 @@ impl PanelShell {
             .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_min_size(
+    pub fn toplevel_min_size_waiting(
         &self,
         min_size: Option<stardust_xr_protocol::types::proxies::Size2>,
     ) -> gluon::OnewayFuture {
@@ -2259,7 +2262,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_min_size_event(
+    pub fn toplevel_min_size(
         &self,
         min_size: Option<stardust_xr_protocol::types::proxies::Size2>,
     ) -> Result<(), gluon::SendError> {
@@ -2277,7 +2280,7 @@ impl PanelShell {
             .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_fullscreen(
+    pub fn toplevel_fullscreen_waiting(
         &self,
         fullscreen_active: impl Into<bool>,
     ) -> gluon::OnewayFuture {
@@ -2309,7 +2312,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_fullscreen_event(
+    pub fn toplevel_fullscreen(
         &self,
         fullscreen_active: impl Into<bool>,
     ) -> Result<(), gluon::SendError> {
@@ -2327,7 +2330,10 @@ impl PanelShell {
             .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_title(&self, title: impl Into<String>) -> gluon::OnewayFuture {
+    pub fn toplevel_title_waiting(
+        &self,
+        title: impl Into<String>,
+    ) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         let title: String = title.into();
         tracing::trace!(
@@ -2355,7 +2361,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_title_event(
+    pub fn toplevel_title(
         &self,
         title: impl Into<String>,
     ) -> Result<(), gluon::SendError> {
@@ -2372,7 +2378,10 @@ impl PanelShell {
             .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn toplevel_app_id(&self, app_id: impl Into<String>) -> gluon::OnewayFuture {
+    pub fn toplevel_app_id_waiting(
+        &self,
+        app_id: impl Into<String>,
+    ) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         let app_id: String = app_id.into();
         tracing::trace!(
@@ -2400,7 +2409,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn toplevel_app_id_event(
+    pub fn toplevel_app_id(
         &self,
         app_id: impl Into<String>,
     ) -> Result<(), gluon::SendError> {
@@ -2417,7 +2426,7 @@ impl PanelShell {
             .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn set_cursor_visuals(
+    pub fn set_cursor_visuals_waiting(
         &self,
         geometry: impl Into<Option<Geometry>>,
     ) -> gluon::OnewayFuture {
@@ -2448,7 +2457,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn set_cursor_visuals_event(
+    pub fn set_cursor_visuals(
         &self,
         geometry: impl Into<Option<Geometry>>,
     ) -> Result<(), gluon::SendError> {
@@ -2465,7 +2474,10 @@ impl PanelShell {
             .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn create_child(&self, child: impl Into<ChildState>) -> gluon::OnewayFuture {
+    pub fn create_child_waiting(
+        &self,
+        child: impl Into<ChildState>,
+    ) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         let child: ChildState = child.into();
         tracing::trace!(
@@ -2493,7 +2505,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn create_child_event(
+    pub fn create_child(
         &self,
         child: impl Into<ChildState>,
     ) -> Result<(), gluon::SendError> {
@@ -2510,7 +2522,7 @@ impl PanelShell {
             .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn move_child(
+    pub fn move_child_waiting(
         &self,
         child_id: impl Into<u64>,
         geometry: impl Into<Geometry>,
@@ -2547,7 +2559,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn move_child_event(
+    pub fn move_child(
         &self,
         child_id: impl Into<u64>,
         geometry: impl Into<Geometry>,
@@ -2568,7 +2580,10 @@ impl PanelShell {
             .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
         Ok(())
     }
-    pub fn destroy_child(&self, child_id: impl Into<u64>) -> gluon::OnewayFuture {
+    pub fn destroy_child_waiting(
+        &self,
+        child_id: impl Into<u64>,
+    ) -> gluon::OnewayFuture {
         use gluon::ToObjectOrRef as _;
         let child_id: u64 = child_id.into();
         tracing::trace!(
@@ -2596,7 +2611,7 @@ impl PanelShell {
         gluon_recv.into()
     }
     ///Fire and Forget, events sent to different objects may not be handled in order
-    pub fn destroy_child_event(
+    pub fn destroy_child(
         &self,
         child_id: impl Into<u64>,
     ) -> Result<(), gluon::SendError> {
