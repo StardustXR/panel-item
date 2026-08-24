@@ -3,7 +3,7 @@ use gluon::{Handler, Interface, Node, RefExt};
 use stardust_xr_asteroids::{Component, ComponentCreateInfo, Context, FnWrapper, ValidState};
 use stardust_xr_fusion::{
     Error,
-    query::{QueryableExt, QueryableInterface, QueryableObject},
+    query::QueryableInterface,
     spatial::{CreatedSpatial, SpatialInterface, SpatialRef, Transform},
 };
 use stardust_xr_panel_item::{
@@ -29,7 +29,7 @@ impl<State: ValidState> PanelItemAcceptor<State> {
 
 pub struct PanelItemAcceptorInner {
     node: Node<PanelItemAcceptorHandler>,
-    _queryable: QueryableObject,
+    // the entity owns the shared queryable; we just hold our interface guard on it
     _interface: QueryableInterface,
 }
 
@@ -42,7 +42,6 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
         ctx: &Context,
         info: ComponentCreateInfo<'_>,
     ) -> Result<Self::Inner, Self::Error> {
-        let client = &ctx.stardust_client;
         let (tx, rx) = mpsc::unbounded_channel();
         let (node, panel_ref) =
             panel_item_acceptor::PanelItemAcceptor::new_node(PanelItemAcceptorHandler {
@@ -51,17 +50,12 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
                 spatial_ref: info.spatial.spatial_ref().await?,
                 spatial_interface: ctx.stardust_client.spatial_interface().clone(),
             })?;
-        let _queryable =
-            QueryableObject::new(client, info.spatial.clone(), info.field.clone()).await?;
-        let _interface = _queryable
+        let _interface = info
+            .queryable
             .add_interface(&panel_ref, panel_item_acceptor::PanelItemAcceptor::ID)
             .await??;
 
-        Ok(PanelItemAcceptorInner {
-            node,
-            _queryable,
-            _interface,
-        })
+        Ok(PanelItemAcceptorInner { node, _interface })
     }
 
     fn diff(
