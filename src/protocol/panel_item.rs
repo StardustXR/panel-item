@@ -64,9 +64,9 @@ pub struct ModifierState {
     pub layout_group: u32,
 }
 impl gluon::Convertable for ModifierState {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.depressed.write(gluon_data)?;
         self.latched.write(gluon_data)?;
@@ -88,7 +88,7 @@ impl gluon::Convertable for ModifierState {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.depressed.write_owned(gluon_data)?;
         self.latched.write_owned(gluon_data)?;
@@ -109,9 +109,9 @@ pub struct ToplevelState {
     pub max_size: Option<stardust_xr_protocol::types::proxies::Size2>,
 }
 impl gluon::Convertable for ToplevelState {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.parent.write(gluon_data)?;
         self.title.write(gluon_data)?;
@@ -172,7 +172,7 @@ impl gluon::Convertable for ToplevelState {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.parent.write_owned(gluon_data)?;
         self.title.write_owned(gluon_data)?;
@@ -207,9 +207,9 @@ pub struct ChildState {
     pub input_regions: Vec<Rect>,
 }
 impl gluon::Convertable for ChildState {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.id.write(gluon_data)?;
         self.parent.write(gluon_data)?;
@@ -234,7 +234,7 @@ impl gluon::Convertable for ChildState {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.id.write_owned(gluon_data)?;
         self.parent.write_owned(gluon_data)?;
@@ -253,9 +253,9 @@ pub struct PanelItemInitData {
     pub children: Vec<ChildState>,
 }
 impl gluon::Convertable for PanelItemInitData {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.cursor.write(gluon_data)?;
         self.toplevel.write(gluon_data)?;
@@ -274,7 +274,7 @@ impl gluon::Convertable for PanelItemInitData {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.cursor.write_owned(gluon_data)?;
         self.toplevel.write_owned(gluon_data)?;
@@ -291,9 +291,9 @@ pub struct Rect {
     pub size: stardust_xr_protocol::types::proxies::Vec2F,
 }
 impl gluon::Convertable for Rect {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         {
             let __w: stardust_xr_protocol::types::proxied::Vec2F = self
@@ -328,7 +328,7 @@ impl gluon::Convertable for Rect {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         {
             let __w: stardust_xr_protocol::types::proxied::Vec2F = self.origin.into();
@@ -350,9 +350,9 @@ pub struct Geometry {
     pub size: stardust_xr_protocol::types::proxies::Size2,
 }
 impl gluon::Convertable for Geometry {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         {
             let __w: stardust_xr_protocol::types::proxied::Vec2I = self
@@ -387,7 +387,7 @@ impl gluon::Convertable for Geometry {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         {
             let __w: stardust_xr_protocol::types::proxied::Vec2I = self.origin.into();
@@ -410,9 +410,9 @@ pub enum ScrollSource {
     WheelTilt,
 }
 impl gluon::Convertable for ScrollSource {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         match self {
             ScrollSource::Wheel => {
@@ -443,7 +443,7 @@ impl gluon::Convertable for ScrollSource {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         match self {
             ScrollSource::Wheel => {
@@ -470,9 +470,9 @@ pub enum SurfaceId {
     Child { id: u64 },
 }
 impl gluon::Convertable for SurfaceId {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         match self {
             SurfaceId::Toplevel => {
@@ -499,7 +499,7 @@ impl gluon::Convertable for SurfaceId {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         match self {
             SurfaceId::Toplevel => {
@@ -522,9 +522,9 @@ pub enum SurfaceUpdateTarget {
     Cursor,
 }
 impl gluon::Convertable for SurfaceUpdateTarget {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         match self {
             SurfaceUpdateTarget::Toplevel => {
@@ -555,7 +555,7 @@ impl gluon::Convertable for SurfaceUpdateTarget {
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         match self {
             SurfaceUpdateTarget::Toplevel => {
@@ -574,22 +574,22 @@ impl gluon::Convertable for SurfaceUpdateTarget {
 }
 #[derive(Debug, Clone)]
 pub struct PanelItem {
-    obj: gluon::ObjectOrRef,
+    obj: gluon::Ref,
 }
 impl gluon::Convertable for PanelItem {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.obj.write(gluon_data)
     }
     fn read(gluon_data: &mut gluon::DataReader) -> Result<Self, gluon::ReadError> {
-        let obj = gluon::ObjectOrRef::read(gluon_data)?;
-        Ok(PanelItem::from_object_or_ref(obj))
+        let obj = gluon::Ref::read(gluon_data)?;
+        Ok(PanelItem::from_ref(obj))
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.obj.write_owned(gluon_data)
     }
@@ -597,57 +597,23 @@ impl gluon::Convertable for PanelItem {
 impl gluon::Interface for PanelItem {
     const ID: &'static str = "org.stardustxr.item.Panel.PanelItem";
 }
+///Carries the per-interface bound for [`gluon::RefExt`]'s handler constructors: only a handler implementing this interface's handler trait can be passed to them.
+impl<H: PanelItemHandler> gluon::HandledBy<H> for PanelItem {}
+///A proxy this process made, carrying the handler behind it — see [`gluon::LocalRef`]. Handed back by [`gluon::RefExt::new_node`] and [`gluon::RefExt::new_service`].
+pub type PanelItemLocal<H> = gluon::LocalRef<PanelItem, H>;
+///Drops the handler share and keeps the proxy, so a [`gluon::LocalRef`] goes anywhere this proxy does — including the `impl Into<Self>` parameters generated for typed refs.
+impl<H: PanelItemHandler> From<PanelItemLocal<H>> for PanelItem {
+    fn from(value: PanelItemLocal<H>) -> PanelItem {
+        value.into_proxy()
+    }
+}
+impl gluon::RefExt for PanelItem {
+    fn from_ref(obj: gluon::Ref) -> PanelItem {
+        PanelItem { obj }
+    }
+}
 impl PanelItem {
     ///delta and position are +Y == Down +X == Right
-    pub fn pointer_motion_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        delta: Option<stardust_xr_protocol::types::proxies::Vec2F>,
-        position: stardust_xr_protocol::types::proxies::Vec2F,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let delta: Option<stardust_xr_protocol::types::proxied::Vec2F> = delta
-            .map(|__v| __v.into());
-        let position: stardust_xr_protocol::types::proxied::Vec2F = position.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "pointer_motion", ? surface, ? delta, ?
-            position, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = delta.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = position.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///delta and position are +Y == Down +X == Right
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn pointer_motion(
         &self,
         surface: impl Into<SurfaceId>,
@@ -665,64 +631,14 @@ impl PanelItem {
             position, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         delta.write(&mut gluon_builder)?;
         position.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj.device().transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 8u32, gluon_builder)?;
         Ok(())
     }
     ///uses event ids from `input_event_codes.h`
-    pub fn pointer_button_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        button: impl Into<u32>,
-        pressed: impl Into<bool>,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let button: u32 = button.into();
-        let pressed: bool = pressed.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "pointer_button", ? surface, ? button, ?
-            pressed, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = button.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = pressed.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///uses event ids from `input_event_codes.h`
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn pointer_button(
         &self,
         surface: impl Into<SurfaceId>,
@@ -739,64 +655,14 @@ impl PanelItem {
             pressed, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         button.write(&mut gluon_builder)?;
         pressed.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 9u32, gluon_builder)?;
         Ok(())
     }
     ///delta is +Y == Down +X == Right
-    pub fn pointer_scroll_pixels_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        delta: stardust_xr_protocol::types::proxies::Vec2F,
-        source: impl Into<ScrollSource>,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let delta: stardust_xr_protocol::types::proxied::Vec2F = delta.into();
-        let source: ScrollSource = source.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "pointer_scroll_pixels", ? surface, ?
-            delta, ? source, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = delta.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = source.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///delta is +Y == Down +X == Right
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn pointer_scroll_pixels(
         &self,
         surface: impl Into<SurfaceId>,
@@ -813,66 +679,14 @@ impl PanelItem {
             delta, ? source, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         delta.write(&mut gluon_builder)?;
         source.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 10u32, gluon_builder)?;
         Ok(())
     }
     ///delta is +Y == Down +X == Right
-    pub fn pointer_scroll_discrete_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        delta: stardust_xr_protocol::types::proxies::Vec2F,
-        source: impl Into<ScrollSource>,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let delta: stardust_xr_protocol::types::proxied::Vec2F = delta.into();
-        let source: ScrollSource = source.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "pointer_scroll_discrete", ? surface, ?
-            delta, ? source, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = delta.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = source.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///delta is +Y == Down +X == Right
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn pointer_scroll_discrete(
         &self,
         surface: impl Into<SurfaceId>,
@@ -889,54 +703,13 @@ impl PanelItem {
             delta, ? source, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         delta.write(&mut gluon_builder)?;
         source.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 11u32, gluon_builder)?;
         Ok(())
     }
-    pub fn pointer_scroll_stop_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "pointer_scroll_stop", ? surface, ?
-            timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn pointer_scroll_stop(
         &self,
         surface: impl Into<SurfaceId>,
@@ -949,72 +722,11 @@ impl PanelItem {
             timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 12u32, gluon_builder)?;
         Ok(())
     }
-    pub fn key_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        key: impl Into<u32>,
-        pressed: impl Into<bool>,
-        modifier_state: impl Into<ModifierState>,
-        keymap: impl Into<stardust_xr_protocol::keymap::Keymap>,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let key: u32 = key.into();
-        let pressed: bool = pressed.into();
-        let modifier_state: ModifierState = modifier_state.into();
-        let keymap: stardust_xr_protocol::keymap::Keymap = keymap.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "key", ? surface, ? key, ? pressed, ?
-            modifier_state, ? keymap, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = key.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = pressed.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = modifier_state.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = keymap.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn key(
         &self,
         surface: impl Into<SurfaceId>,
@@ -1035,68 +747,16 @@ impl PanelItem {
             modifier_state, ? keymap, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         key.write(&mut gluon_builder)?;
         pressed.write(&mut gluon_builder)?;
         modifier_state.write(&mut gluon_builder)?;
         keymap.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 13u32, gluon_builder)?;
         Ok(())
     }
     ///position is +Y == Down +X == Right
-    pub fn touch_down_waiting(
-        &self,
-        surface: impl Into<SurfaceId>,
-        touch_id: impl Into<u32>,
-        position: stardust_xr_protocol::types::proxies::Vec2F,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceId = surface.into();
-        let touch_id: u32 = touch_id.into();
-        let position: stardust_xr_protocol::types::proxied::Vec2F = position.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "touch_down", ? surface, ? touch_id, ?
-            position, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = touch_id.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = position.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///position is +Y == Down +X == Right
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn touch_down(
         &self,
         surface: impl Into<SurfaceId>,
@@ -1113,61 +773,14 @@ impl PanelItem {
             position, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         touch_id.write(&mut gluon_builder)?;
         position.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 14u32, gluon_builder)?;
         Ok(())
     }
     ///position is +Y == Down +X == Right
-    pub fn touch_move_waiting(
-        &self,
-        touch_id: impl Into<u32>,
-        position: stardust_xr_protocol::types::proxies::Vec2F,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let touch_id: u32 = touch_id.into();
-        let position: stardust_xr_protocol::types::proxied::Vec2F = position.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "touch_move", ? touch_id, ? position, ?
-            timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = touch_id.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = position.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///position is +Y == Down +X == Right
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn touch_move(
         &self,
         touch_id: impl Into<u32>,
@@ -1182,52 +795,12 @@ impl PanelItem {
             timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         touch_id.write(&mut gluon_builder)?;
         position.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 15u32, gluon_builder)?;
         Ok(())
     }
-    pub fn touch_up_waiting(
-        &self,
-        touch_id: impl Into<u32>,
-        timestamp: impl Into<Option<stardust_xr_protocol::types::Timestamp>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let touch_id: u32 = touch_id.into();
-        let timestamp: Option<stardust_xr_protocol::types::Timestamp> = timestamp.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "touch_up", ? touch_id, ? timestamp, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = touch_id.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = timestamp.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn touch_up(
         &self,
         touch_id: impl Into<u32>,
@@ -1239,115 +812,25 @@ impl PanelItem {
             interface = "PanelItem", method = "touch_up", ? touch_id, ? timestamp, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         touch_id.write(&mut gluon_builder)?;
         timestamp.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 16u32, gluon_builder)?;
         Ok(())
     }
-    pub fn close_toplevel_waiting(&self) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        tracing::trace!(interface = "PanelItem", method = "close_toplevel", "→");
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn close_toplevel(&self) -> Result<(), gluon::SendError> {
         tracing::trace!(interface = "PanelItem", method = "close_toplevel", "→");
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 17u32, gluon_builder)?;
         Ok(())
     }
-    pub fn resize_toplevel_to_app_request_waiting(&self) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        tracing::trace!(
-            interface = "PanelItem", method = "resize_toplevel_to_app_request", "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn resize_toplevel_to_app_request(&self) -> Result<(), gluon::SendError> {
         tracing::trace!(
             interface = "PanelItem", method = "resize_toplevel_to_app_request", "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 18u32, gluon_builder)?;
         Ok(())
     }
-    pub fn request_toplevel_resize_waiting(
-        &self,
-        new_size: stardust_xr_protocol::types::proxies::Size2,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let new_size: stardust_xr_protocol::types::proxied::Size2 = new_size.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "request_toplevel_resize", ? new_size,
-            "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = new_size.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 19u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn request_toplevel_resize(
         &self,
         new_size: stardust_xr_protocol::types::proxies::Size2,
@@ -1358,45 +841,10 @@ impl PanelItem {
             "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         new_size.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 19u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 19u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_focused_waiting(
-        &self,
-        focused: impl Into<bool>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let focused: bool = focused.into();
-        tracing::trace!(
-            interface = "PanelItem", method = "toplevel_focused", ? focused, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = focused.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 20u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_focused(
         &self,
         focused: impl Into<bool>,
@@ -1406,31 +854,22 @@ impl PanelItem {
             interface = "PanelItem", method = "toplevel_focused", ? focused, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         focused.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 20u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 20u32, gluon_builder)?;
         Ok(())
     }
-    pub fn from_handler<H: PanelItemHandler>(
-        obj: &impl gluon::OwnedObjectRef<H>,
-    ) -> PanelItem {
-        PanelItem::from_object_or_ref(gluon::OwnedObjectRef::to_object_or_ref(obj))
-    }
-    ///only use this when you know the binder ref implements this interface, else the consquences are for you to find out
-    pub fn from_object_or_ref(obj: gluon::ObjectOrRef) -> PanelItem {
+    ///only use this when you know the ref leads to something implementing this interface, else the consquences are for you to find out
+    pub fn from_ref(obj: gluon::Ref) -> PanelItem {
         PanelItem { obj }
     }
 }
-impl From<PanelItem> for gluon::ObjectOrRef {
+impl From<PanelItem> for gluon::Ref {
     fn from(value: PanelItem) -> Self {
         value.obj
     }
 }
-impl gluon::ToObjectOrRef for PanelItem {
-    fn to_binder_object_or_ref(&self) -> gluon::ObjectOrRef {
+impl gluon::ToRef for PanelItem {
+    fn to_ref(&self) -> gluon::Ref {
         self.obj.clone()
     }
 }
@@ -1558,9 +997,6 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
         async move {
             match transaction_code {
                 8u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let __wire_param_delta: Option<
                         stardust_xr_protocol::types::proxied::Vec2F,
@@ -1599,19 +1035,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 9u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_button = gluon::Convertable::read(&mut gluon_data)?;
                     let param_pressed = gluon::Convertable::read(&mut gluon_data)?;
@@ -1636,19 +1061,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 10u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let __wire_param_delta: stardust_xr_protocol::types::proxied::Vec2F = gluon::Convertable::read(
                         &mut gluon_data,
@@ -1679,19 +1093,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 11u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let __wire_param_delta: stardust_xr_protocol::types::proxied::Vec2F = gluon::Convertable::read(
                         &mut gluon_data,
@@ -1722,19 +1125,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 12u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_timestamp = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
@@ -1750,19 +1142,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 13u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_key = gluon::Convertable::read(&mut gluon_data)?;
                     let param_pressed = gluon::Convertable::read(&mut gluon_data)?;
@@ -1793,19 +1174,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 14u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_touch_id = gluon::Convertable::read(&mut gluon_data)?;
                     let __wire_param_position: stardust_xr_protocol::types::proxied::Vec2F = gluon::Convertable::read(
@@ -1836,19 +1206,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 15u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_touch_id = gluon::Convertable::read(&mut gluon_data)?;
                     let __wire_param_position: stardust_xr_protocol::types::proxied::Vec2F = gluon::Convertable::read(
                         &mut gluon_data,
@@ -1872,19 +1231,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 16u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_touch_id = gluon::Convertable::read(&mut gluon_data)?;
                     let param_timestamp = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
@@ -1900,19 +1248,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 17u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     tracing::trace!(
                         interface = "PanelItem", method = "close_toplevel", "dispatching"
                     );
@@ -1925,19 +1262,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 18u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     tracing::trace!(
                         interface = "PanelItem", method =
                         "resize_toplevel_to_app_request", "dispatching"
@@ -1951,19 +1277,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 19u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let __wire_param_new_size: stardust_xr_protocol::types::proxied::Size2 = gluon::Convertable::read(
                         &mut gluon_data,
                     )?;
@@ -1984,19 +1299,8 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 20u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_focused = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelItem", method = "toplevel_focused", ?
@@ -2011,14 +1315,6 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 _ => {}
             }
@@ -2028,22 +1324,22 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
 }
 #[derive(Debug, Clone)]
 pub struct PanelShell {
-    obj: gluon::ObjectOrRef,
+    obj: gluon::Ref,
 }
 impl gluon::Convertable for PanelShell {
-    fn write<'a, 'b: 'a>(
-        &'b self,
-        gluon_data: &mut gluon::DataBuilder<'a>,
+    fn write(
+        &self,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.obj.write(gluon_data)
     }
     fn read(gluon_data: &mut gluon::DataReader) -> Result<Self, gluon::ReadError> {
-        let obj = gluon::ObjectOrRef::read(gluon_data)?;
-        Ok(PanelShell::from_object_or_ref(obj))
+        let obj = gluon::Ref::read(gluon_data)?;
+        Ok(PanelShell::from_ref(obj))
     }
     fn write_owned(
         self,
-        gluon_data: &mut gluon::DataBuilder<'_>,
+        gluon_data: &mut gluon::DataBuilder,
     ) -> Result<(), gluon::WriteError> {
         self.obj.write_owned(gluon_data)
     }
@@ -2051,60 +1347,22 @@ impl gluon::Convertable for PanelShell {
 impl gluon::Interface for PanelShell {
     const ID: &'static str = "org.stardustxr.item.Panel.PanelShell";
 }
-impl PanelShell {
-    pub fn update_surface_dmatex_waiting(
-        &self,
-        surface: impl Into<SurfaceUpdateTarget>,
-        dmatex: impl Into<stardust_xr_protocol::dmatex::DmatexRef>,
-        acquire_point: impl Into<u64>,
-        release_point: impl Into<stardust_xr_protocol::dmatex::DmatexSubmitRelease>,
-        opaque: impl Into<bool>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let surface: SurfaceUpdateTarget = surface.into();
-        let dmatex: stardust_xr_protocol::dmatex::DmatexRef = dmatex.into();
-        let acquire_point: u64 = acquire_point.into();
-        let release_point: stardust_xr_protocol::dmatex::DmatexSubmitRelease = release_point
-            .into();
-        let opaque: bool = opaque.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "update_surface_dmatex", ? surface, ?
-            dmatex, ? acquire_point, ? release_point, ? opaque, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = surface.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = dmatex.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = acquire_point.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = release_point.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = opaque.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
+///Carries the per-interface bound for [`gluon::RefExt`]'s handler constructors: only a handler implementing this interface's handler trait can be passed to them.
+impl<H: PanelShellHandler> gluon::HandledBy<H> for PanelShell {}
+///A proxy this process made, carrying the handler behind it — see [`gluon::LocalRef`]. Handed back by [`gluon::RefExt::new_node`] and [`gluon::RefExt::new_service`].
+pub type PanelShellLocal<H> = gluon::LocalRef<PanelShell, H>;
+///Drops the handler share and keeps the proxy, so a [`gluon::LocalRef`] goes anywhere this proxy does — including the `impl Into<Self>` parameters generated for typed refs.
+impl<H: PanelShellHandler> From<PanelShellLocal<H>> for PanelShell {
+    fn from(value: PanelShellLocal<H>) -> PanelShell {
+        value.into_proxy()
     }
-    ///Fire and Forget, events sent to different objects may not be handled in order
+}
+impl gluon::RefExt for PanelShell {
+    fn from_ref(obj: gluon::Ref) -> PanelShell {
+        PanelShell { obj }
+    }
+}
+impl PanelShell {
     pub fn update_surface_dmatex(
         &self,
         surface: impl Into<SurfaceUpdateTarget>,
@@ -2124,47 +1382,14 @@ impl PanelShell {
             dmatex, ? acquire_point, ? release_point, ? opaque, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         surface.write(&mut gluon_builder)?;
         dmatex.write(&mut gluon_builder)?;
         acquire_point.write(&mut gluon_builder)?;
         release_point.write(&mut gluon_builder)?;
         opaque.write(&mut gluon_builder)?;
-        self.obj.device().transact_one_way(&self.obj, 8u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 8u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_resized_waiting(
-        &self,
-        new_size: stardust_xr_protocol::types::proxies::Size2,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let new_size: stardust_xr_protocol::types::proxied::Size2 = new_size.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "toplevel_resized", ? new_size, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = new_size.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_resized(
         &self,
         new_size: stardust_xr_protocol::types::proxies::Size2,
@@ -2174,44 +1399,10 @@ impl PanelShell {
             interface = "PanelShell", method = "toplevel_resized", ? new_size, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         new_size.write(&mut gluon_builder)?;
-        self.obj.device().transact_one_way(&self.obj, 9u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 9u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_max_size_waiting(
-        &self,
-        max_size: Option<stardust_xr_protocol::types::proxies::Size2>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let max_size: Option<stardust_xr_protocol::types::proxied::Size2> = max_size
-            .map(|__v| __v.into());
-        tracing::trace!(
-            interface = "PanelShell", method = "toplevel_max_size", ? max_size, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = max_size.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_max_size(
         &self,
         max_size: Option<stardust_xr_protocol::types::proxies::Size2>,
@@ -2222,46 +1413,10 @@ impl PanelShell {
             interface = "PanelShell", method = "toplevel_max_size", ? max_size, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         max_size.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 10u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 10u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_min_size_waiting(
-        &self,
-        min_size: Option<stardust_xr_protocol::types::proxies::Size2>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let min_size: Option<stardust_xr_protocol::types::proxied::Size2> = min_size
-            .map(|__v| __v.into());
-        tracing::trace!(
-            interface = "PanelShell", method = "toplevel_min_size", ? min_size, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = min_size.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_min_size(
         &self,
         min_size: Option<stardust_xr_protocol::types::proxies::Size2>,
@@ -2272,46 +1427,10 @@ impl PanelShell {
             interface = "PanelShell", method = "toplevel_min_size", ? min_size, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         min_size.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 11u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 11u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_fullscreen_waiting(
-        &self,
-        fullscreen_active: impl Into<bool>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let fullscreen_active: bool = fullscreen_active.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "toplevel_fullscreen", ?
-            fullscreen_active, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = fullscreen_active.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_fullscreen(
         &self,
         fullscreen_active: impl Into<bool>,
@@ -2322,45 +1441,10 @@ impl PanelShell {
             fullscreen_active, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         fullscreen_active.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 12u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 12u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_title_waiting(
-        &self,
-        title: impl Into<String>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let title: String = title.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "toplevel_title", ? title, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = title.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_title(
         &self,
         title: impl Into<String>,
@@ -2370,45 +1454,10 @@ impl PanelShell {
             interface = "PanelShell", method = "toplevel_title", ? title, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         title.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 13u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 13u32, gluon_builder)?;
         Ok(())
     }
-    pub fn toplevel_app_id_waiting(
-        &self,
-        app_id: impl Into<String>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let app_id: String = app_id.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "toplevel_app_id", ? app_id, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = app_id.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn toplevel_app_id(
         &self,
         app_id: impl Into<String>,
@@ -2418,45 +1467,10 @@ impl PanelShell {
             interface = "PanelShell", method = "toplevel_app_id", ? app_id, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         app_id.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 14u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 14u32, gluon_builder)?;
         Ok(())
     }
-    pub fn set_cursor_visuals_waiting(
-        &self,
-        geometry: impl Into<Option<Geometry>>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let geometry: Option<Geometry> = geometry.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "set_cursor_visuals", ? geometry, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = geometry.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn set_cursor_visuals(
         &self,
         geometry: impl Into<Option<Geometry>>,
@@ -2466,45 +1480,10 @@ impl PanelShell {
             interface = "PanelShell", method = "set_cursor_visuals", ? geometry, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         geometry.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 15u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 15u32, gluon_builder)?;
         Ok(())
     }
-    pub fn create_child_waiting(
-        &self,
-        child: impl Into<ChildState>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let child: ChildState = child.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "create_child", ? child, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = child.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn create_child(
         &self,
         child: impl Into<ChildState>,
@@ -2514,51 +1493,10 @@ impl PanelShell {
             interface = "PanelShell", method = "create_child", ? child, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         child.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 16u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 16u32, gluon_builder)?;
         Ok(())
     }
-    pub fn move_child_waiting(
-        &self,
-        child_id: impl Into<u64>,
-        geometry: impl Into<Geometry>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let child_id: u64 = child_id.into();
-        let geometry: Geometry = geometry.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "move_child", ? child_id, ? geometry,
-            "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = child_id.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = geometry.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn move_child(
         &self,
         child_id: impl Into<u64>,
@@ -2571,46 +1509,11 @@ impl PanelShell {
             "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         child_id.write(&mut gluon_builder)?;
         geometry.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 17u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 17u32, gluon_builder)?;
         Ok(())
     }
-    pub fn destroy_child_waiting(
-        &self,
-        child_id: impl Into<u64>,
-    ) -> gluon::OnewayFuture {
-        use gluon::ToObjectOrRef as _;
-        let child_id: u64 = child_id.into();
-        tracing::trace!(
-            interface = "PanelShell", method = "destroy_child", ? child_id, "→"
-        );
-        let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let gluon_ret = self.obj.device().register_object(gluon_ret_handler);
-        let gluon_ret: Option<gluon::ObjectOrRef> = Some(
-            gluon_ret.to_binder_object_or_ref(),
-        );
-        if let Err(err) = gluon_ret.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = child_id.write(&mut gluon_builder) {
-            return err.into();
-        }
-        if let Err(err) = self
-            .obj
-            .device()
-            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())
-        {
-            return err.into();
-        }
-        gluon_recv.into()
-    }
-    ///Fire and Forget, events sent to different objects may not be handled in order
     pub fn destroy_child(
         &self,
         child_id: impl Into<u64>,
@@ -2620,31 +1523,22 @@ impl PanelShell {
             interface = "PanelShell", method = "destroy_child", ? child_id, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let gluon_ret: Option<gluon::ObjectOrRef> = None;
-        gluon_ret.write(&mut gluon_builder)?;
         child_id.write(&mut gluon_builder)?;
-        self.obj
-            .device()
-            .transact_one_way(&self.obj, 18u32, gluon_builder.to_payload())?;
+        gluon::transact(&self.obj, 18u32, gluon_builder)?;
         Ok(())
     }
-    pub fn from_handler<H: PanelShellHandler>(
-        obj: &impl gluon::OwnedObjectRef<H>,
-    ) -> PanelShell {
-        PanelShell::from_object_or_ref(gluon::OwnedObjectRef::to_object_or_ref(obj))
-    }
-    ///only use this when you know the binder ref implements this interface, else the consquences are for you to find out
-    pub fn from_object_or_ref(obj: gluon::ObjectOrRef) -> PanelShell {
+    ///only use this when you know the ref leads to something implementing this interface, else the consquences are for you to find out
+    pub fn from_ref(obj: gluon::Ref) -> PanelShell {
         PanelShell { obj }
     }
 }
-impl From<PanelShell> for gluon::ObjectOrRef {
+impl From<PanelShell> for gluon::Ref {
     fn from(value: PanelShell) -> Self {
         value.obj
     }
 }
-impl gluon::ToObjectOrRef for PanelShell {
-    fn to_binder_object_or_ref(&self) -> gluon::ObjectOrRef {
+impl gluon::ToRef for PanelShell {
+    fn to_ref(&self) -> gluon::Ref {
         self.obj.clone()
     }
 }
@@ -2739,9 +1633,6 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
         async move {
             match transaction_code {
                 8u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_surface = gluon::Convertable::read(&mut gluon_data)?;
                     let param_dmatex = gluon::Convertable::read(&mut gluon_data)?;
                     let param_acquire_point = gluon::Convertable::read(&mut gluon_data)?;
@@ -2768,19 +1659,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 9u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let __wire_param_new_size: stardust_xr_protocol::types::proxied::Size2 = gluon::Convertable::read(
                         &mut gluon_data,
                     )?;
@@ -2801,19 +1681,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 10u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let __wire_param_max_size: Option<
                         stardust_xr_protocol::types::proxied::Size2,
                     > = gluon::Convertable::read(&mut gluon_data)?;
@@ -2836,19 +1705,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 11u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let __wire_param_min_size: Option<
                         stardust_xr_protocol::types::proxied::Size2,
                     > = gluon::Convertable::read(&mut gluon_data)?;
@@ -2871,19 +1729,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 12u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_fullscreen_active = gluon::Convertable::read(
                         &mut gluon_data,
                     )?;
@@ -2900,19 +1747,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 13u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_title = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelShell", method = "toplevel_title", ?
@@ -2927,19 +1763,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 14u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_app_id = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelShell", method = "toplevel_app_id", ?
@@ -2954,19 +1779,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 15u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_geometry = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelShell", method = "set_cursor_visuals", ?
@@ -2981,19 +1795,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 16u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_child = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelShell", method = "create_child", ? param_child,
@@ -3008,19 +1811,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 17u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_child_id = gluon::Convertable::read(&mut gluon_data)?;
                     let param_geometry = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
@@ -3036,19 +1828,8 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 18u32 => {
-                    let gluon_ret: Option<gluon::ObjectOrRef> = gluon::Convertable::read(
-                        &mut gluon_data,
-                    )?;
                     let param_child_id = gluon::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelShell", method = "destroy_child", ?
@@ -3063,14 +1844,6 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
                             ),
                         )
                         .await;
-                    if let Some(obj) = gluon_ret {
-                        obj.device()
-                            .transact_one_way(
-                                &obj,
-                                0,
-                                gluon::DataBuilder::new().to_payload(),
-                            )?;
-                    }
                 }
                 _ => {}
             }

@@ -1,9 +1,5 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
-
-use binderbinder::binder_object::BinderObject;
+use crate::panel_shell::PanelShellHandler;
+use gluon::Node;
 use stardust_xr_asteroids::{CustomElement, Transformable, ValidState};
 use stardust_xr_fusion::{
     Error,
@@ -12,11 +8,12 @@ use stardust_xr_fusion::{
     spatial::{Spatial, SpatialExt as _, SpatialRef, Transform},
     types::{Resource, ResourceLoadError, rgba_linear},
 };
-
 use stardust_xr_panel_item::panel_item::SurfaceUpdateTarget;
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 use tokio::task::AbortHandle;
-
-use crate::panel_shell::PanelShellHandler;
 
 #[derive(Debug)]
 pub struct SurfaceModel {
@@ -28,14 +25,14 @@ pub struct SurfaceModel {
 }
 impl SurfaceModel {
     pub fn new(
-        shell: &BinderObject<PanelShellHandler>,
+        shell: &Node<PanelShellHandler>,
         surface: impl Into<SurfaceUpdateTarget>,
         resource: Resource,
         surface_part_path: &str,
     ) -> Self {
         Self {
             transform: Transform::IDENTITY,
-            shell: shell.handler_arc().clone(),
+            shell: shell.handler().clone(),
             part_path: surface_part_path.to_string(),
             model_resource: resource,
             surface: surface.into(),
@@ -66,10 +63,10 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
             tracing::warn!(
                 "changing the SurfaceModel resource after creation is currently not supported"
             )
-        } else if self.part_path != old_self.part_path {
-            if let Some(new_part) = inner.parts.get(&self.part_path) {
-                *inner.part.lock().unwrap() = new_part.clone();
-            }
+        } else if self.part_path != old_self.part_path
+            && let Some(new_part) = inner.parts.get(&self.part_path)
+        {
+            *inner.part.lock().unwrap() = new_part.clone();
         }
         if inner
             .task

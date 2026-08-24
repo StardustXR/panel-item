@@ -1,16 +1,17 @@
-use std::sync::{
-    Arc, Mutex, OnceLock,
-    atomic::{AtomicBool, Ordering},
-};
-
-use binderbinder::{BinderDevice, binder_object::BinderObject};
 use derive_where::derive_where;
-use gluon::Handler;
+use gluon::{Handler, Node, RefExt};
 use mint::Vector2;
 use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
 use stardust_xr_fusion::{
-    Error, dmatex::{DmatexRef, DmatexSubmitRelease}, spatial::{Spatial, SpatialRef, Transform}, types::Size2
+    Error, Result,
+    dmatex::{DmatexRef, DmatexSubmitRelease},
+    spatial::{Spatial, SpatialRef, Transform},
+    types::Size2,
+};
+use std::sync::{
+    Arc, Mutex, OnceLock,
+    atomic::{AtomicBool, Ordering},
 };
 use tokio::{
     sync::{
@@ -21,7 +22,8 @@ use tokio::{
 };
 
 use stardust_xr_panel_item::panel_item::{
-    ChildState, Geometry, PanelItem, PanelShellHandler as _, SurfaceUpdateTarget,
+    self, ChildState, Geometry, PanelItem, PanelShellHandler as _, PanelShellLocal,
+    SurfaceUpdateTarget,
 };
 
 #[derive_where(Debug)]
@@ -46,11 +48,11 @@ pub struct PanelShell<State: ValidState> {
 }
 impl<State: ValidState> PanelShell<State> {
     pub fn new(
-        handler: &BinderObject<PanelShellHandler>,
+        handler: &Node<PanelShellHandler>,
         item_disconnected: impl Fn(&mut State) + Send + Sync + 'static,
     ) -> Self {
         Self {
-            handler: handler.handler_arc().clone(),
+            handler: handler.handler().clone(),
             on_toplevel_resolution_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_max_size_changed: FnWrapper(Box::new(|_, _, _| {})),
             on_toplevel_min_size_changed: FnWrapper(Box::new(|_, _, _| {})),
@@ -69,14 +71,13 @@ impl<State: ValidState> PanelShell<State> {
 
 impl<State: ValidState> CustomElement<State> for PanelShell<State> {
     type Inner = SpatialRef;
-
     type Error = Error;
 
     async fn create_inner(
         &self,
         _asteroids_context: &stardust_xr_asteroids::Context,
         info: stardust_xr_asteroids::CreateInnerInfo,
-    ) -> Result<Self::Inner, Self::Error> {
+    ) -> Result<Self::Inner> {
         Ok(info.parent_space)
     }
 
@@ -91,7 +92,7 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
         _ = self
             .handler
             .item_output_spatial
-            .set_local_transform(self.transform.clone());
+            .set_local_transform(self.transform);
     }
 
     fn frame(
@@ -184,10 +185,9 @@ pub struct PanelShellHandler {
 }
 impl PanelShellHandler {
     pub fn new(
-        device: &Arc<BinderDevice>,
         item: PanelItem,
         item_output_spatial: Spatial,
-    ) -> BinderObject<Self> {
+    ) -> Result<(Node<Self>, PanelShellLocal<Self>)> {
         let (toplevel_tx, toplevel_rx) = mpsc::unbounded_channel();
         let (cursor_tx, cursor_rx) = mpsc::unbounded_channel();
         let mut surface_tx = FxHashMap::default();
@@ -203,7 +203,7 @@ impl PanelShellHandler {
             Arc::new(RwLock::new(cursor_rx)),
         );
         let (tx, rx) = mpsc::unbounded_channel();
-        let v = device.register_object(Self {
+        let v = panel_item::PanelShell::new_node(PanelShellHandler {
             tx,
             rx: Mutex::new(rx),
             item_output_spatial,
@@ -212,11 +212,8 @@ impl PanelShellHandler {
             surface_tx: Arc::new(surface_tx.into()),
             death_task: OnceLock::new(),
             death_handled: AtomicBool::new(false),
-        });
-        let death_future = v.strong_refs_hit_zero();
-        let death_task = tokio::spawn(death_future);
-        _ = v.death_task.set(death_task);
-        v
+        })?;
+        Ok(v)
     }
     pub fn item(&self) -> &PanelItem {
         &self.item
@@ -270,25 +267,19 @@ impl stardust_xr_panel_item::panel_item::PanelShellHandler for PanelShellHandler
 
     async fn toplevel_resized(&self, _ctx: gluon::Context, new_size: Size2) {
         self.tx
-            .send(PanelShellEvent::ToplevelResized {
-                new_size: new_size.into(),
-            })
+            .send(PanelShellEvent::ToplevelResized { new_size })
             .unwrap();
     }
 
     async fn toplevel_max_size(&self, _ctx: gluon::Context, max_size: Option<Size2>) {
         self.tx
-            .send(PanelShellEvent::ToplevelMaxSize {
-                max_size: max_size.map(Into::into),
-            })
+            .send(PanelShellEvent::ToplevelMaxSize { max_size })
             .unwrap();
     }
 
     async fn toplevel_min_size(&self, _ctx: gluon::Context, min_size: Option<Size2>) {
         self.tx
-            .send(PanelShellEvent::ToplevelMinSize {
-                min_size: min_size.map(Into::into),
-            })
+            .send(PanelShellEvent::ToplevelMinSize { min_size })
             .unwrap();
     }
 

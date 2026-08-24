@@ -1,26 +1,25 @@
 use crate::panel_shell::PanelShellHandler;
-use gluon::{Handler, Object, ToObjectOrRef};
+use gluon::{Handler, Interface, Node, RefExt};
 use stardust_xr_asteroids::{Component, ComponentCreateInfo, Context, FnWrapper, ValidState};
 use stardust_xr_fusion::{
     Error,
-    query::{QueryableExt, QueryableInterfaceGuard, QueryableObject},
+    query::{QueryableExt, QueryableInterface, QueryableObject},
     spatial::{CreatedSpatial, SpatialInterface, SpatialRef, Transform},
 };
-use stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler as _;
 use stardust_xr_panel_item::{
-    panel_item::{PanelItem, PanelShell},
-    panel_item_acceptor,
+    panel_item::PanelItem,
+    panel_item_acceptor::{self, PanelItemAcceptorHandler as _},
 };
 use std::sync::Mutex;
 use tokio::sync::mpsc;
 
 #[derive_where::derive_where(Debug)]
 pub struct PanelItemAcceptor<State: ValidState> {
-    on_create_item: FnWrapper<dyn Fn(&mut State, Object<PanelShellHandler>) + Send + Sync>,
+    on_create_item: FnWrapper<dyn Fn(&mut State, Node<PanelShellHandler>) + Send + Sync>,
 }
 impl<State: ValidState> PanelItemAcceptor<State> {
     pub fn new(
-        on_accept: impl Fn(&mut State, Object<PanelShellHandler>) + Send + Sync + 'static,
+        on_accept: impl Fn(&mut State, Node<PanelShellHandler>) + Send + Sync + 'static,
     ) -> Self {
         Self {
             on_create_item: FnWrapper(Box::new(on_accept)),
@@ -29,9 +28,9 @@ impl<State: ValidState> PanelItemAcceptor<State> {
 }
 
 pub struct PanelItemAcceptorInner {
-    handler: Object<PanelItemAcceptorHandler>,
+    node: Node<PanelItemAcceptorHandler>,
     _queryable: QueryableObject,
-    _interface_guard: QueryableInterfaceGuard,
+    _interface: QueryableInterface,
 }
 
 impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
@@ -45,27 +44,23 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
     ) -> Result<Self::Inner, Self::Error> {
         let client = &ctx.stardust_client;
         let (tx, rx) = mpsc::unbounded_channel();
-        let handler = client
-            .pion_device()
-            .register_object(PanelItemAcceptorHandler {
+        let (node, panel_ref) =
+            panel_item_acceptor::PanelItemAcceptor::new_node(PanelItemAcceptorHandler {
                 tx,
                 rx: Mutex::new(rx),
                 spatial_ref: info.spatial.spatial_ref().await?,
                 spatial_interface: ctx.stardust_client.spatial_interface().clone(),
-            });
+            })?;
         let _queryable =
             QueryableObject::new(client, info.spatial.clone(), info.field.clone()).await?;
-        let _interface_guard = _queryable
-            .add_interface(
-                &handler,
-                panel_item_acceptor::EXTERNAL_PROTOCOL.protocol_name,
-            )
-            .await?;
+        let _interface = _queryable
+            .add_interface(&panel_ref, panel_item_acceptor::PanelItemAcceptor::ID)
+            .await??;
 
         Ok(PanelItemAcceptorInner {
-            handler,
+            node,
             _queryable,
-            _interface_guard,
+            _interface,
         })
     }
 
@@ -84,7 +79,7 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
         state: &mut State,
         inner: &mut Self::Inner,
     ) {
-        while let Ok(shell) = inner.handler.rx.lock().unwrap().try_recv() {
+        while let Ok(shell) = inner.node.rx.lock().unwrap().try_recv() {
             self.on_create_item.0(state, shell)
         }
     }
@@ -94,8 +89,8 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
 pub struct PanelItemAcceptorHandler {
     spatial_ref: SpatialRef,
     spatial_interface: SpatialInterface,
-    tx: mpsc::UnboundedSender<Object<PanelShellHandler>>,
-    rx: Mutex<mpsc::UnboundedReceiver<Object<PanelShellHandler>>>,
+    tx: mpsc::UnboundedSender<Node<PanelShellHandler>>,
+    rx: Mutex<mpsc::UnboundedReceiver<Node<PanelShellHandler>>>,
 }
 impl stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler
     for PanelItemAcceptorHandler
@@ -115,13 +110,8 @@ impl stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler
             .unwrap()
             .unwrap();
 
-        let panel_shell = PanelShellHandler::new(
-            item.to_binder_object_or_ref().device(),
-            item.clone(),
-            spatial,
-        );
-        let proxy = PanelShell::from_handler(&panel_shell);
+        let (panel_shell, panel_shell_ref) = PanelShellHandler::new(item.clone(), spatial).unwrap();
         self.tx.send(panel_shell).unwrap();
-        (proxy, spatial_ref)
+        (panel_shell_ref.into_proxy(), spatial_ref)
     }
 }
