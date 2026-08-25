@@ -1,5 +1,5 @@
 use derive_where::derive_where;
-use gluon::{Handler, Node, RefExt};
+use gluon::{Handler, Liveness, Node, RefExt};
 use mint::Vector2;
 use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
@@ -203,7 +203,7 @@ impl PanelShellHandler {
             Arc::new(RwLock::new(cursor_rx)),
         );
         let (tx, rx) = mpsc::unbounded_channel();
-        let v = panel_item::PanelShell::new_node(PanelShellHandler {
+        let (node, local) = panel_item::PanelShell::new_node(PanelShellHandler {
             tx,
             rx: Mutex::new(rx),
             item_output_spatial,
@@ -213,7 +213,11 @@ impl PanelShellHandler {
             death_task: OnceLock::new(),
             death_handled: AtomicBool::new(false),
         })?;
-        Ok(v)
+        // watch the item, not our own node: `item_disconnected` means the panel item went
+        // away, and the task can only be spawned once the handler is behind its `Arc`
+        let death_task = tokio::spawn(node.handler().item.death_notification());
+        _ = node.handler().death_task.set(death_task);
+        Ok((node, local))
     }
     pub fn item(&self) -> &PanelItem {
         &self.item
