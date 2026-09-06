@@ -30,8 +30,11 @@ impl gluon::Convertable for PanelItemAcceptor {
         self.obj.write_owned(gluon_data)
     }
 }
-impl gluon::Interface for PanelItemAcceptor {
+impl PanelItemAcceptor {
     const ID: &'static str = "org.stardustxr.item.PanelAcceptor.PanelItemAcceptor";
+}
+impl gluon::Interface for PanelItemAcceptor {
+    const ID: &'static str = Self::ID;
 }
 ///Carries the per-interface bound for [`gluon::RefExt`]'s handler constructors: only a handler implementing this interface's handler trait can be passed to them.
 impl<H: PanelItemAcceptorHandler> gluon::HandledBy<H> for PanelItemAcceptor {}
@@ -61,13 +64,11 @@ impl PanelItemAcceptor {
             interface = "PanelItemAcceptor", method = "accept", ? item, "→"
         );
         let mut gluon_builder = gluon::DataBuilder::new();
-        let (gluon_ret_handler, mut gluon_recv) = gluon::ReturnHandler::new();
-        let (gluon_ret_node, gluon_ret) = gluon::Node::new(gluon_ret_handler)?;
+        let (mut gluon_recv, gluon_ret) = gluon::ReturnReceiver::new()?;
         gluon_builder.write_ref(&gluon_ret)?;
         item.write(&mut gluon_builder)?;
         gluon::transact(&self.obj, 8u32, gluon_builder)?;
         let mut reader = gluon_recv.recv().await.unwrap();
-        drop(gluon_ret_node);
         let __ret_shell = gluon::Convertable::read(&mut reader)?;
         let __ret_output_spatial = gluon::Convertable::read(&mut reader)?;
         tracing::trace!(
@@ -178,6 +179,27 @@ pub trait PanelItemAcceptorHandler: gluon::Handler + Send + Sync + 'static {
             }
             Ok(())
         }
+    }
+    fn to_node(
+        self,
+    ) -> Result<
+        (gluon::Node<Self>, gluon::LocalRef<PanelItemAcceptor, Self>),
+        gluon::NodeError,
+    >
+    where
+        Self: Sized,
+    {
+        use gluon::RefExt;
+        PanelItemAcceptor::new_node(self)
+    }
+    fn to_service(
+        self,
+    ) -> Result<gluon::LocalRef<PanelItemAcceptor, Self>, gluon::NodeError>
+    where
+        Self: Sized,
+    {
+        use gluon::RefExt;
+        PanelItemAcceptor::new_service(self)
     }
 }
 pub mod proxied {

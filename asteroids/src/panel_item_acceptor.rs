@@ -1,6 +1,8 @@
 use crate::panel_shell::PanelShellHandler;
 use gluon::{Handler, Interface, Node, RefExt};
-use stardust_xr_asteroids::{Component, ComponentCreateInfo, Context, FnWrapper, ValidState};
+use stardust_xr_asteroids::{
+    Component, ComponentCreateInfo, Context, FnWrapper, Inners, ValidState,
+};
 use stardust_xr_fusion::{
     Error,
     query::QueryableInterface,
@@ -63,7 +65,7 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
         _old: &Self,
         _context: &Context,
         _create_info: ComponentCreateInfo<'_>,
-        _inner: &mut Self::Inner,
+        _inners: &mut Inners<'_, State, Self>,
     ) {
     }
     fn frame(
@@ -71,8 +73,9 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
         _context: &Context,
         _info: &stardust_xr_fusion::client::FrameInfo,
         state: &mut State,
-        inner: &mut Self::Inner,
+        inners: &mut Inners<'_, State, Self>,
     ) {
+        let inner = inners.self_inner();
         while let Ok(shell) = inner.node.rx.lock().unwrap().try_recv() {
             self.on_create_item.0(state, shell)
         }

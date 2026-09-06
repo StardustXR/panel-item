@@ -594,8 +594,11 @@ impl gluon::Convertable for PanelItem {
         self.obj.write_owned(gluon_data)
     }
 }
-impl gluon::Interface for PanelItem {
+impl PanelItem {
     const ID: &'static str = "org.stardustxr.item.Panel.PanelItem";
+}
+impl gluon::Interface for PanelItem {
+    const ID: &'static str = Self::ID;
 }
 ///Carries the per-interface bound for [`gluon::RefExt`]'s handler constructors: only a handler implementing this interface's handler trait can be passed to them.
 impl<H: PanelItemHandler> gluon::HandledBy<H> for PanelItem {}
@@ -1316,6 +1319,22 @@ pub trait PanelItemHandler: gluon::Handler + Send + Sync + 'static {
             Ok(())
         }
     }
+    fn to_node(
+        self,
+    ) -> Result<(gluon::Node<Self>, gluon::LocalRef<PanelItem, Self>), gluon::NodeError>
+    where
+        Self: Sized,
+    {
+        use gluon::RefExt;
+        PanelItem::new_node(self)
+    }
+    fn to_service(self) -> Result<gluon::LocalRef<PanelItem, Self>, gluon::NodeError>
+    where
+        Self: Sized,
+    {
+        use gluon::RefExt;
+        PanelItem::new_service(self)
+    }
 }
 #[derive(Debug, Clone)]
 pub struct PanelShell {
@@ -1339,8 +1358,11 @@ impl gluon::Convertable for PanelShell {
         self.obj.write_owned(gluon_data)
     }
 }
-impl gluon::Interface for PanelShell {
+impl PanelShell {
     const ID: &'static str = "org.stardustxr.item.Panel.PanelShell";
+}
+impl gluon::Interface for PanelShell {
+    const ID: &'static str = Self::ID;
 }
 ///Carries the per-interface bound for [`gluon::RefExt`]'s handler constructors: only a handler implementing this interface's handler trait can be passed to them.
 impl<H: PanelShellHandler> gluon::HandledBy<H> for PanelShell {}
@@ -1839,6 +1861,22 @@ pub trait PanelShellHandler: gluon::Handler + Send + Sync + 'static {
             }
             Ok(())
         }
+    }
+    fn to_node(
+        self,
+    ) -> Result<(gluon::Node<Self>, gluon::LocalRef<PanelShell, Self>), gluon::NodeError>
+    where
+        Self: Sized,
+    {
+        use gluon::RefExt;
+        PanelShell::new_node(self)
+    }
+    fn to_service(self) -> Result<gluon::LocalRef<PanelShell, Self>, gluon::NodeError>
+    where
+        Self: Sized,
+    {
+        use gluon::RefExt;
+        PanelShell::new_service(self)
     }
 }
 pub mod proxied {
