@@ -1,8 +1,7 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
-use gluon_codegen::helpers::gen_multiple_modules;
-use gluon_codegen::{Derives, ModuleExternalProtocol};
+use gluon_ipc_codegen::{Derives, ModuleExternalProtocol, helpers::gen_multiple_modules};
 
 fn main() {
     // Use the codegen library directly to regenerate protocol files
@@ -11,11 +10,11 @@ fn main() {
         &[
             (
                 "panel_item",
-                Path::new("./schemas/org.stardustxr.item.Panel.gluon"),
+                Path::new("./gluon/org.stardustxr.item.Panel.gluon"),
             ),
             (
                 "panel_item_acceptor",
-                Path::new("./schemas/org.stardustxr.item.PanelAcceptor.gluon"),
+                Path::new("./gluon/org.stardustxr.item.PanelAcceptor.gluon"),
             ),
         ],
         &[

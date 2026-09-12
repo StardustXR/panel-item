@@ -1,5 +1,5 @@
 use crate::panel_shell::PanelShellHandler;
-use gluon::{Handler, Interface, Node, RefExt};
+use gluon_ipc::{Handler, Interface, Node, RefExt};
 use stardust_xr_asteroids::{
     Component, ComponentCreateInfo, Context, FnWrapper, Inners, ValidState,
 };
@@ -94,7 +94,7 @@ impl stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler
 {
     async fn accept(
         &self,
-        _ctx: gluon::Context,
+        _ctx: gluon_ipc::Context,
         item: PanelItem,
     ) -> (stardust_xr_panel_item::panel_item::PanelShell, SpatialRef) {
         let CreatedSpatial {

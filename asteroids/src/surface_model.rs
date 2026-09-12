@@ -1,5 +1,5 @@
 use crate::panel_shell::PanelShellHandler;
-use gluon::Node;
+use gluon_ipc::Node;
 use stardust_xr_asteroids::{CustomElement, Transformable, ValidState};
 use stardust_xr_fusion::{
     Error,

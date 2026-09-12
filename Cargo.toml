@@ -1,31 +1,40 @@
 [package]
 name = "stardust-xr-panel-item"
-version = "0.1.0"
+version = "0.52.0"
 edition = "2024"
+
+authors = ["Nova King <technobaboo@proton.me>"]
+description = "General 2D compatibility protocol and library with hotswappable shells"
+license = "MIT"
+repository = "https://github.com/StardustXR/panel-item/"
+homepage = "https://stardustxr.org"
 
 [workspace]
 members = ["asteroids"]
 
 [workspace.dependencies]
-gluon = { git = "https://github.com/technobaboo/gluon", branch = "refactor/strongipc" }
-mint = "0.5.9"
 tracing = "0.1.44"
+mint = "0.5.9"
+gluon-ipc = "0.1.0"
+stardust-xr-protocol = "0.52.0"
+stardust-xr-fusion = "0.52.0"
+stardust-xr-asteroids = "0.52.0"
 
 [dependencies]
-stardust-xr-fusion = { git = "https://github.com/StardustXR/core", branch = "refactor/strongipc" }
-stardust-xr-protocol = { git = "https://github.com/StardustXR/core", branch = "refactor/strongipc" }
+gluon-ipc.workspace = true
+stardust-xr-protocol.workspace = true
+stardust-xr-fusion.workspace = true
 tokio = { version = "1.49.0", features = ["sync"] }
-gluon.workspace = true
 mint.workspace = true
 tracing.workspace = true
 serde = { version = "1.0.228", features = ["derive"], optional = true }
 
 [build-dependencies]
-stardust-xr-protocol = { git = "https://github.com/StardustXR/core", branch = "refactor/strongipc" }
+stardust-xr-protocol = "0.52.0"
 syn = "2"
 prettyplease = "0.2"
-gluon-parser = { git = "https://github.com/technobaboo/gluon", branch = "refactor/strongipc" }
-gluon-codegen = { git = "https://github.com/technobaboo/gluon", branch = "refactor/strongipc" }
+gluon-ipc-parser = "0.1.0"
+gluon-ipc-codegen = "0.1.0"
 
 [features]
 serde = ["dep:serde", "stardust-xr-protocol/serde"]

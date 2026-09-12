@@ -1,5 +1,5 @@
 use derive_where::derive_where;
-use gluon::{Handler, Liveness, Node, RefExt};
+use gluon_ipc::{Handler, Liveness, Node, RefExt};
 use mint::Vector2;
 use rustc_hash::FxHashMap;
 use stardust_xr_asteroids::{CustomElement, FnWrapper, Transformable, ValidState};
@@ -248,7 +248,7 @@ enum PanelShellEvent {
 impl stardust_xr_panel_item::panel_item::PanelShellHandler for PanelShellHandler {
     async fn update_surface_dmatex(
         &self,
-        _ctx: gluon::Context,
+        _ctx: gluon_ipc::Context,
         surface: SurfaceUpdateTarget,
         dmatex: DmatexRef,
         acquire_point: u64,
@@ -269,49 +269,49 @@ impl stardust_xr_panel_item::panel_item::PanelShellHandler for PanelShellHandler
         });
     }
 
-    async fn toplevel_resized(&self, _ctx: gluon::Context, new_size: Size2) {
+    async fn toplevel_resized(&self, _ctx: gluon_ipc::Context, new_size: Size2) {
         self.tx
             .send(PanelShellEvent::ToplevelResized { new_size })
             .unwrap();
     }
 
-    async fn toplevel_max_size(&self, _ctx: gluon::Context, max_size: Option<Size2>) {
+    async fn toplevel_max_size(&self, _ctx: gluon_ipc::Context, max_size: Option<Size2>) {
         self.tx
             .send(PanelShellEvent::ToplevelMaxSize { max_size })
             .unwrap();
     }
 
-    async fn toplevel_min_size(&self, _ctx: gluon::Context, min_size: Option<Size2>) {
+    async fn toplevel_min_size(&self, _ctx: gluon_ipc::Context, min_size: Option<Size2>) {
         self.tx
             .send(PanelShellEvent::ToplevelMinSize { min_size })
             .unwrap();
     }
 
-    async fn toplevel_fullscreen(&self, _ctx: gluon::Context, fullscreen_active: bool) {
+    async fn toplevel_fullscreen(&self, _ctx: gluon_ipc::Context, fullscreen_active: bool) {
         self.tx
             .send(PanelShellEvent::ToplevelFullscreen { fullscreen_active })
             .unwrap();
     }
 
-    async fn toplevel_title(&self, _ctx: gluon::Context, title: String) {
+    async fn toplevel_title(&self, _ctx: gluon_ipc::Context, title: String) {
         self.tx
             .send(PanelShellEvent::ToplevelTitle { title })
             .unwrap();
     }
 
-    async fn toplevel_app_id(&self, _ctx: gluon::Context, app_id: String) {
+    async fn toplevel_app_id(&self, _ctx: gluon_ipc::Context, app_id: String) {
         self.tx
             .send(PanelShellEvent::ToplevelAppId { app_id })
             .unwrap();
     }
 
-    async fn set_cursor_visuals(&self, _ctx: gluon::Context, geometry: Option<Geometry>) {
+    async fn set_cursor_visuals(&self, _ctx: gluon_ipc::Context, geometry: Option<Geometry>) {
         self.tx
             .send(PanelShellEvent::SetCursorVisuals { geometry })
             .unwrap();
     }
 
-    async fn create_child(&self, _ctx: gluon::Context, child: ChildState) {
+    async fn create_child(&self, _ctx: gluon_ipc::Context, child: ChildState) {
         let surface_target = SurfaceUpdateTarget::Child { id: child.id };
         self.tx
             .send(PanelShellEvent::CreateChild { child })
@@ -328,13 +328,13 @@ impl stardust_xr_panel_item::panel_item::PanelShellHandler for PanelShellHandler
         });
     }
 
-    async fn move_child(&self, _ctx: gluon::Context, child_id: u64, geometry: Geometry) {
+    async fn move_child(&self, _ctx: gluon_ipc::Context, child_id: u64, geometry: Geometry) {
         self.tx
             .send(PanelShellEvent::MoveChild { child_id, geometry })
             .unwrap();
     }
 
-    async fn destroy_child(&self, _ctx: gluon::Context, child_id: u64) {
+    async fn destroy_child(&self, _ctx: gluon_ipc::Context, child_id: u64) {
         self.tx
             .send(PanelShellEvent::DestroyChild { child_id })
             .unwrap();

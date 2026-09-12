@@ -1,15 +1,21 @@
 [package]
 name = "stardust-xr-panel-item-asteroids"
-version = "0.1.0"
+version = "0.52.0"
 edition = "2024"
 
+authors = ["Nova King <technobaboo@proton.me>"]
+description = "Asteroids declarative UI for panel shells"
+license = "MIT"
+repository = "https://github.com/StardustXR/panel-item/"
+homepage = "https://stardustxr.org"
+
 [dependencies]
-stardust-xr-fusion = { git = "https://github.com/StardustXR/core", branch = "refactor/strongipc" }
-stardust-xr-asteroids = { git = "https://github.com/StardustXR/asteroids", branch = "refactor/strongipc" }
-stardust-xr-panel-item.path = ".."
+gluon-ipc.workspace = true
+stardust-xr-fusion.workspace = true
+stardust-xr-asteroids.workspace = true
+stardust-xr-panel-item.path = "../"
 tokio = { version = "1.49.0", features = ["sync"] }
 derive-where = "1.6.0"
-gluon.workspace = true
 directories = "6.0.0"
 mint.workspace = true
 tracing.workspace = true
