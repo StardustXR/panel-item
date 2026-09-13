@@ -1,5 +1,5 @@
 [package]
-name = "stardust-xr-panel-item"
+name = "stardust-xr-panels"
 version = "0.52.0"
 edition = "2024"
 

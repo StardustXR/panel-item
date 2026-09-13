@@ -21,7 +21,7 @@ use tokio::{
     task::JoinHandle,
 };
 
-use stardust_xr_panel_item::panel_item::{
+use stardust_xr_panels::panel_item::{
     self, ChildState, Geometry, PanelItem, PanelShellHandler as _, PanelShellLocal,
     SurfaceUpdateTarget,
 };
@@ -245,7 +245,7 @@ enum PanelShellEvent {
     DestroyChild { child_id: u64 },
 }
 
-impl stardust_xr_panel_item::panel_item::PanelShellHandler for PanelShellHandler {
+impl stardust_xr_panels::panel_item::PanelShellHandler for PanelShellHandler {
     async fn update_surface_dmatex(
         &self,
         _ctx: gluon_ipc::Context,

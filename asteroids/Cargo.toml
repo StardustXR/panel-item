@@ -1,5 +1,5 @@
 [package]
-name = "stardust-xr-panel-item-asteroids"
+name = "stardust-xr-panels-asteroids"
 version = "0.52.0"
 edition = "2024"
 
@@ -13,7 +13,7 @@ homepage = "https://stardustxr.org"
 gluon-ipc.workspace = true
 stardust-xr-fusion.workspace = true
 stardust-xr-asteroids.workspace = true
-stardust-xr-panel-item.path = "../"
+stardust-xr-panels.path = "../"
 tokio = { version = "1.49.0", features = ["sync"] }
 derive-where = "1.6.0"
 directories = "6.0.0"
