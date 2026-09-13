@@ -1620,7 +1620,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "stardust-xr-panel-item"
+name = "stardust-xr-panels"
 version = "0.1.0"
 dependencies = [
  "gluon",
@@ -1637,7 +1637,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "stardust-xr-panel-item-asteroids"
+name = "stardust-xr-panels-asteroids"
 version = "0.1.0"
 dependencies = [
  "derive-where",
@@ -1647,7 +1647,7 @@ dependencies = [
  "rustc-hash",
  "stardust-xr-asteroids",
  "stardust-xr-fusion",
- "stardust-xr-panel-item",
+ "stardust-xr-panels",
  "tokio",
  "tracing",
 ]

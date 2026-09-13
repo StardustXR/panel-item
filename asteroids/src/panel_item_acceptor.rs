@@ -6,7 +6,7 @@ use stardust_xr_fusion::{
     query::QueryableInterface,
     spatial::{CreatedSpatial, SpatialInterface, SpatialRef, Transform},
 };
-use stardust_xr_panel_item::{
+use stardust_xr_panels::{
     panel_item::PanelItem,
     panel_item_acceptor::{self, PanelItemAcceptorHandler as _},
 };
@@ -86,14 +86,14 @@ pub struct PanelItemAcceptorHandler {
     tx: mpsc::UnboundedSender<Node<PanelShellHandler>>,
     rx: Mutex<mpsc::UnboundedReceiver<Node<PanelShellHandler>>>,
 }
-impl stardust_xr_panel_item::panel_item_acceptor::PanelItemAcceptorHandler
+impl stardust_xr_panels::panel_item_acceptor::PanelItemAcceptorHandler
     for PanelItemAcceptorHandler
 {
     async fn accept(
         &self,
         _ctx: gluon::Context,
         item: PanelItem,
-    ) -> (stardust_xr_panel_item::panel_item::PanelShell, SpatialRef) {
+    ) -> (stardust_xr_panels::panel_item::PanelShell, SpatialRef) {
         let CreatedSpatial {
             spatial,
             spatial_ref,

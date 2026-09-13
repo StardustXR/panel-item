@@ -8,7 +8,7 @@ use stardust_xr_fusion::{
     spatial::{Spatial, SpatialExt as _, SpatialRef, Transform},
     types::{Resource, ResourceLoadError, rgba_linear},
 };
-use stardust_xr_panel_item::panel_item::SurfaceUpdateTarget;
+use stardust_xr_panels::panel_item::SurfaceUpdateTarget;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
