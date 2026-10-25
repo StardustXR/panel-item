@@ -5,7 +5,7 @@ import "org.stardustxr.Spatial" as spatial
 /// the binding name and secret are provided by SDXR_PROTECTED_PANEL=path:{binding_name}:{secret}
 /// both the name and secret should be randomly generated but need to be valid utf8 and must not include `:` (colon)
 interface ProtectedPanelProvider {
-	get_panel(secret: String, acceptor: Ref<panel_acceptor::PanelAcceptor>) -> (result: ProtectedPanelGetResult)
+	get_panel(secret: String, acceptor: Ref<panel_acceptor::PanelItemAcceptor>) -> (result: ProtectedPanelGetResult)
 }
 
 /// result returned by ProtectedPanelProvider::get_panel to make it easy to detect if a panel item was provided

@@ -134,10 +134,10 @@ impl ProtectedPanelProvider {
     pub async fn get_panel(
         &self,
         secret: impl Into<String>,
-        acceptor: impl Into<super::panel_item_acceptor::PanelAcceptor>,
+        acceptor: impl Into<super::panel_item_acceptor::PanelItemAcceptor>,
     ) -> Result<ProtectedPanelGetResult, gluon_ipc::SendError> {
         let secret: String = secret.into();
-        let acceptor: super::panel_item_acceptor::PanelAcceptor = acceptor.into();
+        let acceptor: super::panel_item_acceptor::PanelItemAcceptor = acceptor.into();
         tracing::trace!(
             interface = "ProtectedPanelProvider", method = "get_panel", ? secret, ?
             acceptor, "→"
@@ -196,14 +196,14 @@ pub trait ProtectedPanelProviderHandler: gluon_ipc::Handler + Send + Sync + 'sta
         &self,
         _ctx: gluon_ipc::Context,
         secret: String,
-        acceptor: super::panel_item_acceptor::PanelAcceptor,
+        acceptor: super::panel_item_acceptor::PanelItemAcceptor,
     ) -> impl Future<Output = ProtectedPanelGetResult> + Send + Sync;
     ///Dispatched instead of [`Self::get_panel`] so a slow reply doesn't hold up dispatch of the next transaction. The default implementation just awaits `get_panel` and sends the result through `reply`. Override this method instead of `get_panel` to defer the reply: stash `reply` (it's `Send + Sync + 'static`) somewhere else — a channel, a queue, another task — and return as soon as this method's future is done, without waiting for the reply to actually be sent.
     fn get_panel_oneway(
         &self,
         _ctx: gluon_ipc::Context,
         secret: String,
-        acceptor: super::panel_item_acceptor::PanelAcceptor,
+        acceptor: super::panel_item_acceptor::PanelItemAcceptor,
         reply: gluon_ipc::ReplySender<ProtectedPanelGetResult>,
     ) -> impl Future<Output = Result<(), gluon_ipc::SendError>> + Send + Sync {
         async move {
