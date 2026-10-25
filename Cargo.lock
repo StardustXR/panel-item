@@ -1289,6 +1289,7 @@ dependencies = [
  "stardust-xr-protocol",
  "tokio",
  "tracing",
+ "xdg",
 ]
 
 [[package]]

@@ -11,17 +11,19 @@ use stardust_xr_fusion::{
 use stardust_xr_panels::{
     panel_item::PanelItem,
     panel_item_acceptor::{self, PanelItemAcceptorHandler as _},
+    protected_panel_provider,
 };
 use std::sync::Mutex;
 use tokio::sync::mpsc;
 
 #[derive_where::derive_where(Debug)]
 pub struct PanelItemAcceptor<State: ValidState> {
-    on_create_item: FnWrapper<dyn Fn(&mut State, Node<PanelShellHandler>) + Send + Sync>,
+    on_create_item: FnWrapper<dyn Fn(&mut State, Node<PanelShellHandler>, bool) + Send + Sync>,
 }
 impl<State: ValidState> PanelItemAcceptor<State> {
+    /// the bool in `on_accept` is whether the underlying panel item was received through the `SDXR_PROTECTED_PANEL` env var.
     pub fn new(
-        on_accept: impl Fn(&mut State, Node<PanelShellHandler>) + Send + Sync + 'static,
+        on_accept: impl Fn(&mut State, Node<PanelShellHandler>, bool) + Send + Sync + 'static,
     ) -> Self {
         Self {
             on_create_item: FnWrapper(Box::new(on_accept)),
@@ -31,6 +33,7 @@ impl<State: ValidState> PanelItemAcceptor<State> {
 
 pub struct PanelItemAcceptorInner {
     node: Node<PanelItemAcceptorHandler>,
+    got_panel_from_env: bool,
     // the entity owns the shared queryable; we just hold our interface guard on it
     _interface: QueryableInterface,
 }
@@ -52,12 +55,18 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
                 spatial_ref: info.spatial.spatial_ref().await?,
                 spatial_interface: ctx.stardust_client.spatial_interface().clone(),
             })?;
+        let got_panel_from_env =
+            protected_panel_provider::get_env_var_panel(panel_ref.proxy().clone()).await;
         let _interface = info
             .queryable
             .add_interface(&panel_ref, panel_item_acceptor::PanelItemAcceptor::ID)
             .await??;
 
-        Ok(PanelItemAcceptorInner { node, _interface })
+        Ok(PanelItemAcceptorInner {
+            node,
+            _interface,
+            got_panel_from_env,
+        })
     }
 
     fn diff(
@@ -77,7 +86,9 @@ impl<State: ValidState> Component<State> for PanelItemAcceptor<State> {
     ) {
         let inner = inners.self_inner();
         while let Ok(shell) = inner.node.rx.lock().unwrap().try_recv() {
-            self.on_create_item.0(state, shell)
+            let from_env = inner.got_panel_from_env;
+            inner.got_panel_from_env = false;
+            self.on_create_item.0(state, shell, from_env)
         }
     }
 }

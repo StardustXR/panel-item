@@ -16,6 +16,10 @@ fn main() {
                 "panel_item_acceptor",
                 Path::new("./gluon/org.stardustxr.item.PanelAcceptor.gluon"),
             ),
+            (
+                "protected_panel_provider",
+                Path::new("./gluon/org.stardustxr.item.ProtectedPanelProvider.gluon"),
+            ),
         ],
         &[
             &ModuleExternalProtocol {

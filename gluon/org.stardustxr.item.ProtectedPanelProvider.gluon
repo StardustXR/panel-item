@@ -1,0 +1,18 @@
+import "org.stardustxr.item.PanelAcceptor" as panel_acceptor
+import "org.stardustxr.Spatial" as spatial
+
+/// a single use getter for a panel item bound to the fs at $XDG_RUNTIME_PATH/stardust-protected-panel-provider/{binding_name}
+/// the binding name and secret are provided by SDXR_PROTECTED_PANEL=path:{binding_name}:{secret}
+/// both the name and secret should be randomly generated but need to be valid utf8 and must not include `:` (colon)
+interface ProtectedPanelProvider {
+	get_panel(secret: String, acceptor: Ref<panel_acceptor::PanelAcceptor>) -> (result: ProtectedPanelGetResult)
+}
+
+/// result returned by ProtectedPanelProvider::get_panel to make it easy to detect if a panel item was provided
+enum ProtectedPanelGetResult {
+	InvalidSecret,
+	InvalidAcceptor,
+	/// should only be returned in case of a second request before the node was destroyed
+	AlreadyConsumed,
+	Success,
+}
