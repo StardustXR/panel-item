@@ -35,7 +35,7 @@ pub async fn get_env_var_panel(acceptor: PanelItemAcceptor) -> bool {
     };
     let Some(ref_path) = xdg::BaseDirectories::new()
         .runtime_dir
-        .map(|v| v.join(path_name))
+        .map(|v| v.join("stardust-protected-panel-provider").join(path_name))
     else {
         tracing::warn!("failed to get runtime dir?");
         return false;
