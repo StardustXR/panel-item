@@ -5,8 +5,8 @@ use std::{
 
 use gluon_ipc::Ref;
 
-pub use crate::protocol::panel_item_acceptor::*;
-use crate::protocol::protected_panel_provider::{ProtectedPanelGetResult, ProtectedPanelProvider};
+use crate::panel_item_acceptor::PanelItemAcceptor;
+pub use crate::protocol::protected_panel_provider::*;
 static ALREADY_TRIED_ENV: AtomicBool = AtomicBool::new(false);
 
 pub async fn get_env_var_panel(acceptor: PanelItemAcceptor) -> bool {
