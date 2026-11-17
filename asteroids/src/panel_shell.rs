@@ -22,7 +22,7 @@ use tokio::{
 };
 
 use stardust_xr_panels::panel_item::{
-    self, ChildState, Geometry, PanelItem, PanelShellHandler as _, PanelShellLocal,
+    self, ChildState, Geometry, PanelItem, PanelShellHandler as _, PanelShellLocal, Rect,
     SurfaceUpdateTarget,
 };
 
@@ -168,6 +168,7 @@ pub(super) struct SurfaceUpdate {
     pub(super) acquire_point: u64,
     pub(super) release_point: DmatexSubmitRelease,
     pub(super) opaque: bool,
+    pub(super) src: Option<Rect>,
 }
 
 #[derive(Debug, Handler)]
@@ -254,6 +255,7 @@ impl stardust_xr_panels::panel_item::PanelShellHandler for PanelShellHandler {
         acquire_point: u64,
         release_point: DmatexSubmitRelease,
         opaque: bool,
+        src: Option<Rect>,
     ) {
         let surface_tx = self.surface_tx.clone();
         tokio::spawn(async move {
@@ -263,6 +265,7 @@ impl stardust_xr_panels::panel_item::PanelShellHandler for PanelShellHandler {
                     acquire_point,
                     release_point,
                     opaque,
+                    src,
                 })
                 .unwrap();
             }

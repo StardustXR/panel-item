@@ -8,7 +8,7 @@ use stardust_xr_fusion::{
     spatial::{Spatial, SpatialExt as _, SpatialRef, Transform},
     types::{Resource, ResourceLoadError, rgba_linear},
 };
-use stardust_xr_panels::panel_item::SurfaceUpdateTarget;
+use stardust_xr_panels::panel_item::{Rect, SurfaceUpdateTarget};
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -107,6 +107,22 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                                     MaterialParameter::Color {
                                         value: rgba_linear!(1.0, 1.0, 1.0, 1.0),
                                     },
+                                )
+                                .await;
+                            let src = msg.src.unwrap_or(Rect {
+                                origin: [0.0; 2].into(),
+                                size: [1.0; 2].into(),
+                            });
+                            _ = part
+                                .set_material_parameter(
+                                    "uv_offset",
+                                    MaterialParameter::Vec2 { value: src.origin },
+                                )
+                                .await;
+                            _ = part
+                                .set_material_parameter(
+                                    "uv_scale",
+                                    MaterialParameter::Vec2 { value: src.size },
                                 )
                                 .await;
                             _ = part

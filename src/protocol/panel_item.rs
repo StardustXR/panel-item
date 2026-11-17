@@ -1411,6 +1411,7 @@ impl gluon_ipc::RefExt for PanelShell {
     }
 }
 impl PanelShell {
+    ///src crops the dmatex in uv space (0 to 1), none shows the whole thing
     pub fn update_surface_dmatex(
         &self,
         surface: impl Into<SurfaceUpdateTarget>,
@@ -1418,6 +1419,7 @@ impl PanelShell {
         acquire_point: impl Into<u64>,
         release_point: impl Into<stardust_xr_protocol::dmatex::DmatexSubmitRelease>,
         opaque: impl Into<bool>,
+        src: impl Into<Option<Rect>>,
     ) -> Result<(), gluon_ipc::SendError> {
         let surface: SurfaceUpdateTarget = surface.into();
         let dmatex: stardust_xr_protocol::dmatex::DmatexRef = dmatex.into();
@@ -1425,9 +1427,10 @@ impl PanelShell {
         let release_point: stardust_xr_protocol::dmatex::DmatexSubmitRelease = release_point
             .into();
         let opaque: bool = opaque.into();
+        let src: Option<Rect> = src.into();
         tracing::trace!(
             interface = "PanelShell", method = "update_surface_dmatex", ? surface, ?
-            dmatex, ? acquire_point, ? release_point, ? opaque, "→"
+            dmatex, ? acquire_point, ? release_point, ? opaque, ? src, "→"
         );
         let mut gluon_builder = gluon_ipc::DataBuilder::new();
         surface.write(&mut gluon_builder)?;
@@ -1435,6 +1438,7 @@ impl PanelShell {
         acquire_point.write(&mut gluon_builder)?;
         release_point.write(&mut gluon_builder)?;
         opaque.write(&mut gluon_builder)?;
+        src.write(&mut gluon_builder)?;
         gluon_ipc::transact(&self.obj, 8u32, gluon_builder)?;
         Ok(())
     }
@@ -1608,6 +1612,7 @@ impl PartialEq for PanelShell {
 impl Eq for PanelShell {}
 ///PanelShell
 pub trait PanelShellHandler: gluon_ipc::Handler + Send + Sync + 'static {
+    ///src crops the dmatex in uv space (0 to 1), none shows the whole thing
     fn update_surface_dmatex(
         &self,
         _ctx: gluon_ipc::Context,
@@ -1616,6 +1621,7 @@ pub trait PanelShellHandler: gluon_ipc::Handler + Send + Sync + 'static {
         acquire_point: u64,
         release_point: stardust_xr_protocol::dmatex::DmatexSubmitRelease,
         opaque: bool,
+        src: Option<Rect>,
     ) -> impl Future<Output = ()> + Send + Sync;
     fn toplevel_resized(
         &self,
@@ -1686,10 +1692,11 @@ pub trait PanelShellHandler: gluon_ipc::Handler + Send + Sync + 'static {
                         &mut gluon_data,
                     )?;
                     let param_opaque = gluon_ipc::Convertable::read(&mut gluon_data)?;
+                    let param_src = gluon_ipc::Convertable::read(&mut gluon_data)?;
                     tracing::trace!(
                         interface = "PanelShell", method = "update_surface_dmatex", ?
                         param_surface, ? param_dmatex, ? param_acquire_point, ?
-                        param_release_point, ? param_opaque, "dispatching"
+                        param_release_point, ? param_opaque, ? param_src, "dispatching"
                     );
                     drop(gluon_data);
                     self.update_surface_dmatex(
@@ -1699,6 +1706,7 @@ pub trait PanelShellHandler: gluon_ipc::Handler + Send + Sync + 'static {
                             param_acquire_point,
                             param_release_point,
                             param_opaque,
+                            param_src,
                         )
                         .instrument(
                             tracing::trace_span!(

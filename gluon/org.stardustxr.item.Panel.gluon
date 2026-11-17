@@ -31,7 +31,8 @@ interface PanelItem {
 
 /// PanelShell
 interface PanelShell {
-	update_surface_dmatex(surface: SurfaceUpdateTarget, dmatex: Ref<dmatex::DmatexRef>, acquire_point: u64, release_point: Ref<dmatex::DmatexSubmitRelease>, opaque: bool)
+	/// src crops the dmatex in uv space (0 to 1), none shows the whole thing
+	update_surface_dmatex(surface: SurfaceUpdateTarget, dmatex: Ref<dmatex::DmatexRef>, acquire_point: u64, release_point: Ref<dmatex::DmatexSubmitRelease>, opaque: bool, src: Option<Rect>)
 
 	toplevel_resized(new_size: types::Size2)
 	toplevel_max_size(max_size: Option<types::Size2>)
