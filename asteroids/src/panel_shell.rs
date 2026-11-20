@@ -315,20 +315,17 @@ impl stardust_xr_panels::panel_item::PanelShellHandler for PanelShellHandler {
     }
 
     async fn create_child(&self, _ctx: gluon_ipc::Context, child: ChildState) {
+        // the channel has to exist before the shell sees the child, or its surface model has nothing to read
         let surface_target = SurfaceUpdateTarget::Child { id: child.id };
+        let (tx, rx) = unbounded_channel();
+        self.surface_tx.write().await.insert(surface_target, tx);
+        self.surface_rx
+            .write()
+            .await
+            .insert(surface_target, Arc::new(RwLock::new(rx)));
         self.tx
             .send(PanelShellEvent::CreateChild { child })
             .unwrap();
-        let surface_tx = self.surface_tx.clone();
-        let surface_rx = self.surface_rx.clone();
-        tokio::spawn(async move {
-            let (tx, rx) = unbounded_channel();
-            surface_tx.write().await.insert(surface_target, tx);
-            surface_rx
-                .write()
-                .await
-                .insert(surface_target, Arc::new(RwLock::new(rx)));
-        });
     }
 
     async fn move_child(&self, _ctx: gluon_ipc::Context, child_id: u64, geometry: Geometry) {
@@ -342,12 +339,8 @@ impl stardust_xr_panels::panel_item::PanelShellHandler for PanelShellHandler {
             .send(PanelShellEvent::DestroyChild { child_id })
             .unwrap();
         let surface_target = SurfaceUpdateTarget::Child { id: child_id };
-        let surface_tx = self.surface_tx.clone();
-        let surface_rx = self.surface_rx.clone();
-        tokio::spawn(async move {
-            surface_tx.write().await.remove(&surface_target);
-            surface_rx.write().await.remove(&surface_target);
-        });
+        self.surface_tx.write().await.remove(&surface_target);
+        self.surface_rx.write().await.remove(&surface_target);
     }
 }
 impl<State: ValidState> PanelShell<State> {

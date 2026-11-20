@@ -79,12 +79,10 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
                 let surface_rx = self.shell.surface_rx.clone();
                 let target = self.surface;
                 async move {
-                    let recv = surface_rx
-                        .read()
-                        .await
-                        .get(&target)
-                        .expect("invalid surface target")
-                        .clone();
+                    let Some(recv) = surface_rx.read().await.get(&target).cloned() else {
+                        tracing::warn!(?target, "no surface updates for this target");
+                        return;
+                    };
                     loop {
                         let mut recv = recv.write().await;
                         if let Some(msg) = recv.recv().await {
