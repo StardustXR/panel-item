@@ -58,7 +58,7 @@ impl<State: ValidState> CustomElement<State> for SurfaceModel {
         _ctx: &stardust_xr_asteroids::Context,
         inner: &mut Self::Inner,
     ) {
-        self.apply_transform(old_self, &inner.root);
+        self.apply_transform(old_self, &inner.root, &inner.parent);
         if self.model_resource != old_self.model_resource {
             tracing::warn!(
                 "changing the SurfaceModel resource after creation is currently not supported"
@@ -152,6 +152,7 @@ impl Transformable for SurfaceModel {
 }
 pub struct SurfaceModelInner {
     root: Spatial,
+    parent: SpatialRef,
     part: Arc<Mutex<ModelPart>>,
     _model: Model,
     task: Option<AbortHandle>,
@@ -179,6 +180,7 @@ impl SurfaceModelInner {
             .ok_or(Error::ResourceLoad(ResourceLoadError::NotFound))?;
         Ok(SurfaceModelInner {
             root,
+            parent,
             part: Arc::new(Mutex::new(part)),
             _model: model,
             parts,

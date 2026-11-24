@@ -92,7 +92,7 @@ impl<State: ValidState> CustomElement<State> for PanelShell<State> {
         _ = self
             .handler
             .item_output_spatial
-            .set_local_transform(self.transform);
+            .set_relative_transform(inner.clone(), self.transform);
     }
 
     fn frame(
